@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raman G-Peak Diff Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #FAF9F6;
+  color: #1A1A1A;
+  line-height: 1.6;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6B6B6B;
+  font-size: 14px;
+  margin-bottom: 32px;
+}
+
+.card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid #E8E5E0;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+}
+
+/* Upload area */
+.upload-area {
+  border: 2px dashed #E8E5E0;
+  border-radius: 12px;
+  padding: 40px 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #FFFFFF;
+  position: relative;
+}
+.upload-area:hover, .upload-area.drag-over {
+  border-color: #E07A3A;
+  background: #FFF5EE;
+}
+.upload-area .icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  display: block;
+  color: #E07A3A;
+}
+.upload-area p {
+  color: #6B6B6B;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.upload-area .format-hint {
+  font-size: 13px;
+  color: #9E9E9E;
+}
+.upload-area input[type="file"] {
+  display: none;
+}
+.btn-upload {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 9px 22px;
+  background: #E07A3A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+.btn-upload:hover { background: #c96a2f; }
+
+.file-info {
+  margin-top: 14px;
+  font-size: 13px;
+  color: #6B6B6B;
+}
+.file-info .filename {
+  font-weight: 500;
+  color: #1A1A1A;
+}
+
+.sample-link {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.sample-link a {
+  color: #E07A3A;
+  text-decoration: none;
+  font-weight: 500;
+}
+.sample-link a:hover { text-decoration: underline; }
+
+/* Error message */
+.error-msg {
+  background: #FFF0F0;
+  color: #C62828;
+  border: 1px solid #FFCDD2;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 14px;
+  margin-top: 14px;
+  display: none;
+}
+.error-msg.visible { display: block; }
+
+/* Settings panel */
+.settings-panel {
+  display: none;
+}
+.settings-panel.visible { display: block; }
+.settings-panel .card-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #1A1A1A;
+}
+.settings-row {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.setting-group {
+  flex: 1;
+  min-width: 220px;
+}
+.setting-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B6B6B;
+  margin-bottom: 8px;
+}
+.setting-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.setting-controls input[type="number"] {
+  width: 68px;
+  padding: 7px 10px;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.setting-controls input[type="number"]:focus {
+  border-color: #E07A3A;
+  box-shadow: 0 0 0 2px rgba(224,122,58,0.12);
+}
+
+/* Custom range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 6px;
+  background: #E8E5E0;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #E07A3A;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #E07A3A;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  cursor: pointer;
+}
+
+/* Chart area */
+.chart-area {
+  display: none;
+}
+.chart-area.visible { display: block; }
+.chart-placeholder {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9E9E9E;
+  font-size: 14px;
+}
+.chart-placeholder .placeholder-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+#chart-container {
+  width: 100%;
+  min-height: 420px;
+}
+
+/* Stats summary */
+.stats-section {
+  display: none;
+}
+.stats-section.visible { display: block; }
+.stats-section .card-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: #FAF9F6;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #E8E5E0;
+}
+.stat-card .stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #E07A3A;
+  margin-bottom: 2px;
+}
+.stat-card .stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6B6B6B;
+}
+
+/* Distribution table */
+.dist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.dist-table th {
+  background: #FAF9F6;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 13px;
+  color: #6B6B6B;
+  border-bottom: 2px solid #E8E5E0;
+}
+.dist-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #F0EDE8;
+}
+.dist-table tr:last-child td { border-bottom: none; }
+.dist-table .color-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.dist-table .significant {
+  font-weight: 500;
+  color: #E07A3A;
+}
+.bar-cell {
+  position: relative;
+}
+.bar-bg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 8px;
+  border-radius: 4px;
+  opacity: 0.25;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container { padding: 24px 14px 40px; }
+  .card { padding: 20px 18px; }
+  .stats-cards { grid-template-columns: repeat(2, 1fr); }
+  .settings-row { flex-direction: column; gap: 18px; }
+  .upload-area { padding: 28px 18px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Raman G-Peak Diff Analyzer</h1>
+  <p class="subtitle">Before / After G-peak 차이 분포를 분석합니다</p>
+
+  <!-- Upload -->
+  <div class="card">
+    <div class="upload-area" id="upload-area">
+      <span class="icon">&#x1F4C2;</span>
+      <p>CSV 또는 XLSX 파일을 업로드하세요</p>
+      <p class="format-hint"><code>g_peak_before</code>, <code>g_peak_after</code> 컬럼이 필요합니다.</p>
+      <button class="btn-upload" id="btn-upload">파일 선택</button>
+      <input type="file" id="file-input" accept=".csv,.xlsx,.xls">
+      <div class="file-info" id="file-info"></div>
+    </div>
+    <div class="error-msg" id="error-msg"></div>
+    <div class="sample-link">
+      <a href="sample_data.csv" download>sample_data.csv 다운로드</a>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-panel card" id="settings-panel">
+    <div class="card-title">설정</div>
+    <div class="settings-row">
+      <div class="setting-group">
+        <label>구간 크기 (Bin Size)</label>
+        <div class="setting-controls">
+          <input type="number" id="bin-size-num" value="0.5" min="0.1" max="2.0" step="0.1">
+          <input type="range" id="bin-size-range" value="0.5" min="0.1" max="2.0" step="0.1">
+        </div>
+      </div>
+      <div class="setting-group">
+        <label>유의미 기준 (Significance Threshold)</label>
+        <div class="setting-controls">
+          <input type="number" id="threshold-num" value="1.0" min="0.1" max="5.0" step="0.1">
+          <input type="range" id="threshold-range" value="1.0" min="0.1" max="5.0" step="0.1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-area" id="chart-area">
+    <div class="card" style="padding: 20px;">
+      <div id="chart-container"></div>
+    </div>
+  </div>
+
+  <!-- Placeholder before data -->
+  <div class="card" id="chart-placeholder">
+    <div class="chart-placeholder">
+      <span class="placeholder-icon">&#x1F4CA;</span>
+      파일을 업로드하면 분석 차트가 여기에 표시됩니다.
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-section" id="stats-section">
+    <div class="card">
+      <div class="card-title">통계 요약</div>
+      <div class="stats-cards" id="stats-cards"></div>
+      <table class="dist-table" id="dist-table">
+        <thead>
+          <tr>
+            <th>구간</th>
+            <th>개수</th>
+            <th>비율</th>
+            <th style="width:40%">분포</th>
+          </tr>
+        </thead>
+        <tbody id="dist-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // State
+  let rawDiffs = [];
+  let debounceTimer = null;
+
+  // DOM refs
+  const uploadArea = document.getElementById('upload-area');
+  const fileInput = document.getElementById('file-input');
+  const btnUpload = document.getElementById('btn-upload');
+  const fileInfo = document.getElementById('file-info');
+  const errorMsg = document.getElementById('error-msg');
+  const settingsPanel = document.getElementById('settings-panel');
+  const chartArea = document.getElementById('chart-area');
+  const chartPlaceholder = document.getElementById('chart-placeholder');
+  const statsSection = document.getElementById('stats-section');
+
+  const binSizeNum = document.getElementById('bin-size-num');
+  const binSizeRange = document.getElementById('bin-size-range');
+  const thresholdNum = document.getElementById('threshold-num');
+  const thresholdRange = document.getElementById('threshold-range');
+
+  // ─── File Upload ───
+  btnUpload.addEventListener('click', function(e) {
+    e.stopPropagation();
+    fileInput.click();
+  });
+  uploadArea.addEventListener('click', function() { fileInput.click(); });
+  uploadArea.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadArea.classList.add('drag-over');
+  });
+  uploadArea.addEventListener('dragleave', function() {
+    uploadArea.classList.remove('drag-over');
+  });
+  uploadArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadArea.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function() {
+    if (fileInput.files.length) handleFile(fileInput.files[0]);
+  });
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add('visible');
+  }
+  function hideError() {
+    errorMsg.classList.remove('visible');
+  }
+
+  function handleFile(file) {
+    hideError();
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'csv') {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) { processRows(results.data, file.name); },
+        error: function() { showError('CSV 파일을 읽을 수 없습니다.'); }
+      });
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const wb = XLSX.read(e.target.result, { type: 'array' });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+          processRows(rows, file.name);
+        } catch (err) {
+          showError('XLSX 파일을 읽을 수 없습니다: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      showError('지원하지 않는 파일 형식입니다. CSV 또는 XLSX 파일을 업로드하세요.');
+    }
+  }
+
+  function processRows(rows, filename) {
+    if (!rows || rows.length === 0) {
+      showError('파일에 데이터가 없습니다.');
+      return;
+    }
+    const cols = Object.keys(rows[0]);
+    const hasBefore = cols.some(function(c) { return c.trim().toLowerCase() === 'g_peak_before'; });
+    const hasAfter = cols.some(function(c) { return c.trim().toLowerCase() === 'g_peak_after'; });
+    if (!hasBefore || !hasAfter) {
+      showError('필수 컬럼이 없습니다: g_peak_before, g_peak_after 컬럼이 필요합니다. 현재 컬럼: ' + cols.join(', '));
+      return;
+    }
+
+    // Find actual column names (case-insensitive match)
+    var beforeCol = cols.find(function(c) { return c.trim().toLowerCase() === 'g_peak_before'; });
+    var afterCol = cols.find(function(c) { return c.trim().toLowerCase() === 'g_peak_after'; });
+
+    rawDiffs = [];
+    rows.forEach(function(row) {
+      var b = parseFloat(row[beforeCol]);
+      var a = parseFloat(row[afterCol]);
+      if (!isNaN(b) && !isNaN(a)) {
+        rawDiffs.push(a - b);
+      }
+    });
+
+    if (rawDiffs.length === 0) {
+      showError('유효한 수치 데이터가 없습니다.');
+      return;
+    }
+
+    fileInfo.innerHTML = '<span class="filename">' + filename + '</span> &mdash; ' + rawDiffs.length + '개 샘플 로드됨';
+    settingsPanel.classList.add('visible');
+    chartPlaceholder.style.display = 'none';
+    chartArea.classList.add('visible');
+    statsSection.classList.add('visible');
+    renderAll();
+  }
+
+  // ─── Settings sync ───
+  function syncInputs(numEl, rangeEl) {
+    numEl.addEventListener('input', function() {
+      rangeEl.value = numEl.value;
+      scheduleRender();
+    });
+    rangeEl.addEventListener('input', function() {
+      numEl.value = rangeEl.value;
+      scheduleRender();
+    });
+  }
+  syncInputs(binSizeNum, binSizeRange);
+  syncInputs(thresholdNum, thresholdRange);
+
+  function scheduleRender() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function() {
+      if (rawDiffs.length > 0) renderAll();
+    }, 300);
+  }
+
+  // ─── Category generation ───
+  function generateCategories(binSize, threshold, diffs) {
+    var positiveDiffs = diffs.filter(function(d) { return d >= 0; });
+    var maxVal = positiveDiffs.length > 0 ? Math.max.apply(null, positiveDiffs) : 0;
+    if (maxVal <= 0) maxVal = binSize;
+    // Round up maxVal to next bin boundary
+    var topBound = Math.ceil(maxVal / binSize) * binSize;
+
+    var categories = [];
+
+    // Negative always first
+    categories.push({
+      label: '< 0 (음수)',
+      min: -Infinity,
+      max: 0,
+      significant: false
+    });
+
+    // Positive bins
+    for (var low = 0; low < topBound; low = Math.round((low + binSize) * 100) / 100) {
+      var high = Math.round((low + binSize) * 100) / 100;
+      var sig = low >= threshold;
+      categories.push({
+        label: low.toFixed(1) + ' ~ ' + high.toFixed(1),
+        min: low,
+        max: high,
+        significant: sig
+      });
+    }
+
+    // Last "X 이상" bucket
+    var lastBound = topBound;
+    categories.push({
+      label: lastBound.toFixed(1) + ' 이상',
+      min: lastBound,
+      max: Infinity,
+      significant: lastBound >= threshold
+    });
+
+    return categories;
+  }
+
+  // ─── Color generation ───
+  function hexToRgb(hex) {
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return [r, g, b];
+  }
+  function rgbToHex(r, g, b) {
+    return '#' + [r,g,b].map(function(x) { return ('0' + Math.round(x).toString(16)).slice(-2); }).join('');
+  }
+  function lerpColor(hex1, hex2, t) {
+    var a = hexToRgb(hex1), b = hexToRgb(hex2);
+    return rgbToHex(a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t);
+  }
+  function interpolateGradient(colors, t) {
+    if (colors.length === 1) return colors[0];
+    var segment = t * (colors.length - 1);
+    var idx = Math.min(Math.floor(segment), colors.length - 2);
+    var local = segment - idx;
+    return lerpColor(colors[idx], colors[idx + 1], local);
+  }
+
+  var NEGATIVE_COLOR = '#4C72B0';
+  var COOL_COLORS = ['#90CAF9', '#64B5F6'];
+  var WARM_COLORS = ['#FFB74D', '#FF8A65', '#EF5350', '#E53935', '#B71C1C'];
+
+  function assignColors(categories) {
+    var coolCats = [];
+    var warmCats = [];
+    categories.forEach(function(c, i) {
+      if (i === 0) return; // negative
+      if (c.significant) warmCats.push(i);
+      else coolCats.push(i);
+    });
+
+    var colors = [];
+    colors[0] = NEGATIVE_COLOR;
+
+    coolCats.forEach(function(idx, i) {
+      var t = coolCats.length === 1 ? 0.5 : i / (coolCats.length - 1);
+      colors[idx] = interpolateGradient(COOL_COLORS, t);
+    });
+
+    warmCats.forEach(function(idx, i) {
+      var t = warmCats.length === 1 ? 0 : i / (warmCats.length - 1);
+      colors[idx] = interpolateGradient(WARM_COLORS, t);
+    });
+
+    return colors;
+  }
+
+  // ─── Classify diffs ───
+  function classifyDiffs(diffs, categories) {
+    var counts = categories.map(function() { return 0; });
+    diffs.forEach(function(d) {
+      for (var i = 0; i < categories.length; i++) {
+        var c = categories[i];
+        if (d >= c.min && d < c.max) {
+          counts[i]++;
+          return;
+        }
+      }
+      // Edge case: exactly equal to last max boundary → goes to last bucket
+      counts[counts.length - 1]++;
+    });
+    return counts;
+  }
+
+  // ─── Statistics ───
+  function calcStats(arr) {
+    var n = arr.length;
+    var mean = arr.reduce(function(s, v) { return s + v; }, 0) / n;
+    var sorted = arr.slice().sort(function(a, b) { return a - b; });
+    var median = n % 2 === 0 ? (sorted[n/2 - 1] + sorted[n/2]) / 2 : sorted[Math.floor(n/2)];
+    var variance = arr.reduce(function(s, v) { return s + (v - mean) * (v - mean); }, 0) / n;
+    var std = Math.sqrt(variance);
+    return { n: n, mean: mean, median: median, std: std, min: sorted[0], max: sorted[n-1] };
+  }
+
+  // ─── Render All ───
+  function renderAll() {
+    var binSize = parseFloat(binSizeNum.value) || 0.5;
+    var threshold = parseFloat(thresholdNum.value) || 1.0;
+
+    var categories = generateCategories(binSize, threshold, rawDiffs);
+    var colors = assignColors(categories);
+    var counts = classifyDiffs(rawDiffs, categories);
+    var stats = calcStats(rawDiffs);
+
+    renderCharts(categories, colors, counts, stats, binSize, threshold);
+    renderStats(categories, colors, counts, stats);
+  }
+
+  // ─── Render Charts ───
+  function renderCharts(categories, colors, counts, stats, binSize, threshold) {
+    var total = counts.reduce(function(s, v) { return s + v; }, 0);
+
+    // Pie chart
+    var pieLabels = categories.map(function(c, i) {
+      return c.significant ? c.label + ' \u2605' : c.label;
+    });
+    var piePull = categories.map(function(c) { return c.significant ? 0.07 : 0; });
+    var pieText = counts.map(function(cnt, i) {
+      var pct = total > 0 ? (cnt / total * 100).toFixed(1) : '0.0';
+      return cnt + '개 (' + pct + '%)';
+    });
+
+    var pieTrace = {
+      type: 'pie',
+      labels: pieLabels,
+      values: counts,
+      pull: piePull,
+      marker: { colors: colors },
+      textinfo: 'label+text',
+      text: pieText,
+      textposition: 'auto',
+      hoverinfo: 'label+value+percent',
+      textfont: { size: 11, family: 'Noto Sans KR' },
+      hole: 0.03,
+      sort: false,
+      domain: { column: 0 }
+    };
+
+    // Histogram (bar chart with custom bins)
+    var histBinSize = Math.max(0.1, binSize / 2);
+    var histMin = Math.floor(stats.min / histBinSize) * histBinSize;
+    var histMax = Math.ceil(stats.max / histBinSize) * histBinSize + histBinSize;
+    var histBins = [];
+    var histCounts = [];
+    var histColors = [];
+
+    for (var edge = histMin; edge < histMax; edge = Math.round((edge + histBinSize) * 100) / 100) {
+      var nextEdge = Math.round((edge + histBinSize) * 100) / 100;
+      var cnt = 0;
+      var isLast = nextEdge >= histMax;
+      rawDiffs.forEach(function(d) {
+        if (isLast ? (d >= edge && d <= nextEdge) : (d >= edge && d < nextEdge)) cnt++;
+      });
+      if (cnt === 0 && edge > stats.max + histBinSize) continue;
+      histBins.push(edge + histBinSize / 2);
+      histCounts.push(cnt);
+      // Determine color based on which category this bin center falls into
+      var center = edge + histBinSize / 2;
+      var col = '#BDBDBD';
+      for (var ci = 0; ci < categories.length; ci++) {
+        if (center >= categories[ci].min && center < categories[ci].max) {
+          col = colors[ci];
+          break;
+        }
+      }
+      histColors.push(col);
+    }
+
+    var barTrace = {
+      type: 'bar',
+      x: histBins,
+      y: histCounts,
+      marker: { color: histColors, line: { color: '#fff', width: 0.5 } },
+      width: histBinSize * 0.92,
+      hovertemplate: 'Diff: %{x:.2f}<br>Count: %{y}<extra></extra>',
+      xaxis: 'x2',
+      yaxis: 'y2'
+    };
+
+    // Vertical lines for category boundaries
+    var shapes = [];
+    categories.forEach(function(c) {
+      if (c.min !== -Infinity && c.min > histMin) {
+        shapes.push({
+          type: 'line',
+          x0: c.min, x1: c.min,
+          y0: 0, y1: 1,
+          xref: 'x2', yref: 'paper',
+          line: { color: '#BDBDBD', width: 1, dash: 'dot' }
+        });
+      }
+    });
+
+    // Stats annotation for histogram
+    var statsText = 'n = ' + stats.n +
+      '  |  \u03BC = ' + stats.mean.toFixed(2) +
+      '  |  Med = ' + stats.median.toFixed(2) +
+      '  |  \u03C3 = ' + stats.std.toFixed(2);
+
+    var layout = {
+      grid: { rows: 1, columns: 2, pattern: 'independent' },
+      annotations: [
+        {
+          text: '<b>\uAD6C\uAC04\uBCC4 \uBE44\uC728</b>',
+          x: 0.2, y: 1.06, xref: 'paper', yref: 'paper',
+          showarrow: false,
+          font: { size: 14, family: 'Noto Sans KR', color: '#1A1A1A' }
+        },
+        {
+          text: '<b>Diff \uBD84\uD3EC</b>',
+          x: 0.8, y: 1.06, xref: 'paper', yref: 'paper',
+          showarrow: false,
+          font: { size: 14, family: 'Noto Sans KR', color: '#1A1A1A' }
+        },
+        {
+          text: statsText,
+          x: 0.78, y: -0.13, xref: 'paper', yref: 'paper',
+          showarrow: false,
+          font: { size: 11, family: 'Noto Sans KR', color: '#6B6B6B' },
+          bgcolor: '#FAF9F6',
+          bordercolor: '#E8E5E0',
+          borderwidth: 1,
+          borderpad: 6
+        }
+      ],
+      shapes: shapes,
+      xaxis2: {
+        title: { text: 'G-peak Diff (after \u2212 before)', font: { size: 12, color: '#6B6B6B' } },
+        domain: [0.55, 1],
+        zeroline: true,
+        zerolinecolor: '#E8E5E0'
+      },
+      yaxis2: {
+        title: { text: '\uAC1C\uC218', font: { size: 12, color: '#6B6B6B' } },
+        domain: [0, 0.88]
+      },
+      showlegend: false,
+      margin: { t: 50, b: 70, l: 40, r: 20 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: { family: 'Noto Sans KR' }
+    };
+
+    var config = {
+      responsive: true,
+      displayModeBar: false
+    };
+
+    Plotly.newPlot('chart-container', [pieTrace, barTrace], layout, config);
+  }
+
+  // ─── Render Stats ───
+  function renderStats(categories, colors, counts, stats) {
+    var total = counts.reduce(function(s, v) { return s + v; }, 0);
+
+    // Summary cards
+    var cardsHtml =
+      '<div class="stat-card"><div class="stat-value">' + stats.n + '</div><div class="stat-label">\uCD1D \uC0D8\uD50C \uC218</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.mean.toFixed(3) + '</div><div class="stat-label">\uD3C9\uADE0 Diff</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.median.toFixed(3) + '</div><div class="stat-label">\uC911\uC559\uAC12</div></div>' +
+      '<div class="stat-card"><div class="stat-value">' + stats.std.toFixed(3) + '</div><div class="stat-label">\uD45C\uC900\uD3B8\uCC28</div></div>';
+    document.getElementById('stats-cards').innerHTML = cardsHtml;
+
+    // Distribution table
+    var maxCount = Math.max.apply(null, counts);
+    var tbody = document.getElementById('dist-tbody');
+    var rows = '';
+    categories.forEach(function(c, i) {
+      var pct = total > 0 ? (counts[i] / total * 100).toFixed(1) : '0.0';
+      var barW = maxCount > 0 ? (counts[i] / maxCount * 100) : 0;
+      var sigClass = c.significant ? ' significant' : '';
+      rows += '<tr>' +
+        '<td><span class="color-dot" style="background:' + colors[i] + '"></span><span class="' + sigClass + '">' + c.label + (c.significant ? ' \u2605' : '') + '</span></td>' +
+        '<td>' + counts[i] + '</td>' +
+        '<td>' + pct + '%</td>' +
+        '<td class="bar-cell"><div class="bar-bg" style="width:' + barW + '%;background:' + colors[i] + '"></div></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = rows;
+  }
+
+})();
+</script>
+</body>
+</html>
