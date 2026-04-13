@@ -477,6 +477,38 @@ input[type="range"]::-moz-range-thumb {
   color: #C0392B;
 }
 
+/* AI Upload Sub-Toggle */
+.ai-upload-toggle {
+  display: flex;
+  background: #F5F0EB;
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 16px;
+  gap: 3px;
+}
+.ai-upload-btn {
+  flex: 1;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: #6B6B6B;
+  text-align: center;
+}
+.ai-upload-btn.active {
+  background: #fff;
+  color: #1A1A1A;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.ai-upload-btn:not(.active):hover {
+  color: #1A1A1A;
+}
+
 /* AI Upload Grid */
 .ai-upload-section { margin-bottom: 16px; }
 .ai-folder-grid {
@@ -785,28 +817,12 @@ input[type="range"]::-moz-range-thumb {
   <div class="card">
     <!-- Mode Toggle -->
     <div class="mode-toggle">
-      <button class="mode-btn" id="mode-btn-simple" data-mode="simple">분석 결과 CSV</button>
-      <button class="mode-btn active" id="mode-btn-raw" data-mode="raw">라만 장비 로우데이터</button>
-      <button class="mode-btn ai-mode" id="mode-btn-ai" data-mode="ai">AI 분석</button>
-    </div>
-
-    <!-- Simple CSV Mode -->
-    <div id="simple-mode" style="display:none;">
-      <div class="upload-area" id="upload-area">
-        <span class="icon">&#x1F4C2;</span>
-        <p>CSV 또는 XLSX 파일을 업로드하세요</p>
-        <p class="format-hint"><code>g_peak_before</code>, <code>g_peak_after</code> 컬럼이 필요합니다.</p>
-        <button class="btn-upload" id="btn-upload">파일 선택</button>
-        <input type="file" id="file-input" accept=".csv,.xlsx,.xls">
-        <div class="file-info" id="file-info"></div>
-      </div>
-      <div class="sample-link">
-        <a href="sample_data.csv" download>sample_data.csv 다운로드</a>
-      </div>
+      <button class="mode-btn ai-mode active" id="mode-btn-ai" data-mode="ai">AI 분석</button>
+      <button class="mode-btn" id="mode-btn-raw" data-mode="raw">라만 장비 로우데이터</button>
     </div>
 
     <!-- Raw Raman Mode -->
-    <div id="raw-mode">
+    <div id="raw-mode" style="display:none;">
       <div class="raw-upload-grid">
         <!-- Fibril -->
         <div>
@@ -855,8 +871,27 @@ input[type="range"]::-moz-range-thumb {
     </div>
 
     <!-- AI Analysis Mode -->
-    <div id="ai-mode" style="display:none;">
-      <div class="ai-upload-section">
+    <div id="ai-mode">
+      <!-- Upload mode sub-toggle -->
+      <div class="ai-upload-toggle">
+        <button class="ai-upload-btn active" id="ai-upload-substrate" data-upload="substrate">기판 폴더 통째로</button>
+        <button class="ai-upload-btn" id="ai-upload-separate" data-upload="separate">Fibril / Control 따로</button>
+      </div>
+
+      <!-- Substrate folder mode -->
+      <div id="ai-substrate-mode">
+        <div class="upload-area" id="ai-substrate-upload-area" style="padding:32px 28px;">
+          <span class="icon">&#x1F4C2;</span>
+          <p>기판 폴더를 선택하세요</p>
+          <p class="format-hint">예: <code>Ⅰ. SiO2 wafer+FeCl3</code> — A. Fibril / B. Control 자동 감지</p>
+          <button class="btn-upload" id="btn-ai-substrate">폴더 선택</button>
+          <input type="file" id="ai-substrate-input" webkitdirectory multiple>
+          <div class="file-info" id="ai-substrate-info"></div>
+        </div>
+      </div>
+
+      <!-- Separate folder mode -->
+      <div id="ai-separate-mode" style="display:none;">
         <div class="ai-folder-grid">
           <!-- Fibril folder -->
           <div>
@@ -889,11 +924,12 @@ input[type="range"]::-moz-range-thumb {
             </div>
           </div>
         </div>
-        <!-- Concentration checklist -->
-        <div class="ai-conc-checklist" id="ai-conc-checklist" style="display:none;">
-          <h4>감지된 농도</h4>
-          <div class="ai-conc-grid" id="ai-conc-grid"></div>
-        </div>
+      </div>
+
+      <!-- Concentration checklist (shared) -->
+      <div class="ai-conc-checklist" id="ai-conc-checklist" style="display:none;">
+        <h4>감지된 농도</h4>
+        <div class="ai-conc-grid" id="ai-conc-grid"></div>
       </div>
 
       <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>다중 농도 분석 시작</button>
@@ -1000,15 +1036,11 @@ input[type="range"]::-moz-range-thumb {
   // State
   let rawDiffs = [];
   let debounceTimer = null;
-  let currentMode = 'simple';
+  let currentMode = 'ai';
   let fibrilData = null;   // { wavelengths, spectra }
   let controlData = null;  // { wavelengths, spectra }
 
   // DOM refs
-  const uploadArea = document.getElementById('upload-area');
-  const fileInput = document.getElementById('file-input');
-  const btnUpload = document.getElementById('btn-upload');
-  const fileInfo = document.getElementById('file-info');
   const errorMsg = document.getElementById('error-msg');
   const settingsPanel = document.getElementById('settings-panel');
   const chartArea = document.getElementById('chart-area');
@@ -1034,9 +1066,6 @@ input[type="range"]::-moz-range-thumb {
   const gpeakMax = document.getElementById('gpeak-max');
 
   // ─── Mode Toggle ───
-  document.getElementById('mode-btn-simple').addEventListener('click', function() {
-    setMode('simple');
-  });
   document.getElementById('mode-btn-raw').addEventListener('click', function() {
     setMode('raw');
   });
@@ -1046,36 +1075,90 @@ input[type="range"]::-moz-range-thumb {
 
   function setMode(mode) {
     currentMode = mode;
-    document.getElementById('mode-btn-simple').classList.toggle('active', mode === 'simple');
     document.getElementById('mode-btn-raw').classList.toggle('active', mode === 'raw');
     document.getElementById('mode-btn-ai').classList.toggle('active', mode === 'ai');
-    document.getElementById('simple-mode').style.display = mode === 'simple' ? '' : 'none';
     document.getElementById('raw-mode').style.display = mode === 'raw' ? '' : 'none';
     document.getElementById('ai-mode').style.display = mode === 'ai' ? '' : 'none';
     hideError();
   }
 
-  // ─── Simple CSV File Upload ───
-  btnUpload.addEventListener('click', function(e) {
-    e.stopPropagation();
-    fileInput.click();
+  // ─── AI Upload Sub-Toggle (기판 통째로 / 따로) ───
+  document.getElementById('ai-upload-substrate').addEventListener('click', function() {
+    setAiUploadMode('substrate');
   });
-  uploadArea.addEventListener('click', function() { fileInput.click(); });
-  uploadArea.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    uploadArea.classList.add('drag-over');
+  document.getElementById('ai-upload-separate').addEventListener('click', function() {
+    setAiUploadMode('separate');
   });
-  uploadArea.addEventListener('dragleave', function() {
-    uploadArea.classList.remove('drag-over');
+
+  function setAiUploadMode(mode) {
+    document.getElementById('ai-upload-substrate').classList.toggle('active', mode === 'substrate');
+    document.getElementById('ai-upload-separate').classList.toggle('active', mode === 'separate');
+    document.getElementById('ai-substrate-mode').style.display = mode === 'substrate' ? '' : 'none';
+    document.getElementById('ai-separate-mode').style.display = mode === 'separate' ? '' : 'none';
+  }
+
+  // ─── Substrate (기판) Folder Upload ───
+  var aiSubstrateInput = document.getElementById('ai-substrate-input');
+  var btnAiSubstrate = document.getElementById('btn-ai-substrate');
+  var aiSubstrateArea = document.getElementById('ai-substrate-upload-area');
+  var aiSubstrateInfo = document.getElementById('ai-substrate-info');
+
+  btnAiSubstrate.addEventListener('click', function(e) { e.stopPropagation(); aiSubstrateInput.click(); });
+  aiSubstrateArea.addEventListener('click', function() { aiSubstrateInput.click(); });
+  aiSubstrateArea.addEventListener('dragover', function(e) { e.preventDefault(); aiSubstrateArea.classList.add('drag-over'); });
+  aiSubstrateArea.addEventListener('dragleave', function() { aiSubstrateArea.classList.remove('drag-over'); });
+  aiSubstrateInput.addEventListener('change', function() {
+    if (aiSubstrateInput.files.length) handleSubstrateFolderUpload(aiSubstrateInput.files);
   });
-  uploadArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    uploadArea.classList.remove('drag-over');
-    if (e.dataTransfer.files.length) handleSimpleFile(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener('change', function() {
-    if (fileInput.files.length) handleSimpleFile(fileInput.files[0]);
-  });
+
+  function handleSubstrateFolderUpload(files) {
+    hideError();
+    // Classify files into Fibril / Control by path
+    var fibrilFiles = [];
+    var controlFiles = [];
+
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (!f.name.toLowerCase().endsWith('.csv')) continue;
+      var relPath = f.webkitRelativePath || f.name;
+      var lower = relPath.toLowerCase();
+
+      // Detect Fibril vs Control from path
+      var isFibril = lower.indexOf('fibril') !== -1 && lower.indexOf('control') === -1;
+      var isControl = lower.indexOf('control') !== -1;
+
+      if (!isFibril && !isControl) continue;
+      if (!isOMx500File(relPath)) continue;
+
+      if (isFibril) fibrilFiles.push(f);
+      else controlFiles.push(f);
+    }
+
+    if (fibrilFiles.length === 0 && controlFiles.length === 0) {
+      showError('Fibril/Control 폴더를 찾을 수 없습니다. 기판 폴더(예: Ⅰ. SiO2 wafer+FeCl3)를 선택해주세요.');
+      return;
+    }
+
+    // Create a FileList-like array and reuse existing handlers
+    var fakeAreaF = aiFibrilUploadArea;
+    var fakeAreaC = aiControlUploadArea;
+    var fakeInfoF = aiFibrilInfo;
+    var fakeInfoC = aiControlInfo;
+
+    // Process Fibril files
+    if (fibrilFiles.length > 0) {
+      handleAiFolderUpload(fibrilFiles, 'fibril', fakeAreaF, fakeInfoF);
+    }
+    // Process Control files
+    if (controlFiles.length > 0) {
+      handleAiFolderUpload(controlFiles, 'control', fakeAreaC, fakeInfoC);
+    }
+
+    aiSubstrateArea.classList.add('file-loaded');
+    var nFibrilConc = Object.keys(aiFibrilFolders).length;
+    var nControlConc = Object.keys(aiControlFolders).length;
+    aiSubstrateInfo.innerHTML = 'Fibril: ' + fibrilFiles.length + '개 CSV (' + nFibrilConc + '개 농도) | Control: ' + controlFiles.length + '개 CSV (' + nControlConc + '개 농도)';
+  }
 
   // ─── Raw Mode File Upload ───
   function setupRawUploadArea(area, input, btn, infoEl, whichFile) {
@@ -1237,72 +1320,6 @@ input[type="range"]::-moz-range-thumb {
   }
   function hideError() {
     errorMsg.classList.remove('visible');
-  }
-
-  function handleSimpleFile(file) {
-    hideError();
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (ext === 'csv') {
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) { processRows(results.data, file.name); },
-        error: function() { showError('CSV 파일을 읽을 수 없습니다.'); }
-      });
-    } else if (ext === 'xlsx' || ext === 'xls') {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const wb = XLSX.read(e.target.result, { type: 'array' });
-          const ws = wb.Sheets[wb.SheetNames[0]];
-          const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
-          processRows(rows, file.name);
-        } catch (err) {
-          showError('XLSX 파일을 읽을 수 없습니다: ' + err.message);
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    } else {
-      showError('지원하지 않는 파일 형식입니다. CSV 또는 XLSX 파일을 업로드하세요.');
-    }
-  }
-
-  function processRows(rows, filename) {
-    if (!rows || rows.length === 0) {
-      showError('파일에 데이터가 없습니다.');
-      return;
-    }
-    const cols = Object.keys(rows[0]);
-    const hasBefore = cols.some(function(c) { return c.trim().toLowerCase() === 'g_peak_before'; });
-    const hasAfter = cols.some(function(c) { return c.trim().toLowerCase() === 'g_peak_after'; });
-    if (!hasBefore || !hasAfter) {
-      showError('필수 컬럼이 없습니다: g_peak_before, g_peak_after 컬럼이 필요합니다. 현재 컬럼: ' + cols.join(', '));
-      return;
-    }
-
-    var beforeCol = cols.find(function(c) { return c.trim().toLowerCase() === 'g_peak_before'; });
-    var afterCol = cols.find(function(c) { return c.trim().toLowerCase() === 'g_peak_after'; });
-
-    rawDiffs = [];
-    rows.forEach(function(row) {
-      var b = parseFloat(row[beforeCol]);
-      var a = parseFloat(row[afterCol]);
-      if (!isNaN(b) && !isNaN(a)) {
-        rawDiffs.push(b - a);
-      }
-    });
-
-    if (rawDiffs.length === 0) {
-      showError('유효한 수치 데이터가 없습니다.');
-      return;
-    }
-
-    fileInfo.innerHTML = '<span class="filename">' + filename + '</span> &mdash; ' + rawDiffs.length + '개 샘플 로드됨';
-    settingsPanel.classList.add('visible');
-    chartPlaceholder.style.display = 'none';
-    chartArea.classList.add('visible');
-    statsSection.classList.add('visible');
-    renderAll();
   }
 
   // ─── Settings sync ───
