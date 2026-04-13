@@ -1006,6 +1006,7 @@ input[type="range"]::-moz-range-thumb {
     <div class="ai-charts-row">
       <div class="ai-chart-card">
         <div class="chart-title">농도-반응 곡선 (Dose-Response)</div>
+        <div id="ai-dose-response-rationale" style="margin-bottom:12px;"></div>
         <div id="ai-dose-response-chart" style="width:100%;min-height:340px;"></div>
       </div>
       <div class="ai-chart-card">
@@ -2194,6 +2195,32 @@ input[type="range"]::-moz-range-thumb {
   function renderDoseResponseChart(concResults, crossConc, featureKeys, featureLabels, bestFeatureKey) {
     var key = bestFeatureKey || featureKeys[0];
     var cc = crossConc[key];
+
+    // 피처 선정 근거 테이블
+    var rows = featureKeys.map(function(k) {
+      var c = crossConc[k];
+      var r = (c && !isNaN(c.r)) ? c.r.toFixed(3) : '—';
+      var p = (c && !isNaN(c.p)) ? (c.p < 0.001 ? '< 0.001' : c.p.toFixed(3)) : '—';
+      var n = c ? c.logConcs.length : 0;
+      var selected = (k === key);
+      var sig = (c && !isNaN(c.p) && c.p < 0.05) ? ' *' : '';
+      return '<tr style="' + (selected ? 'background:#FFF5EE;font-weight:600;' : '') + '">' +
+        '<td style="padding:4px 10px;font-size:12px;">' + (selected ? '▸ ' : '') + featureLabels[k] + '</td>' +
+        '<td style="padding:4px 10px;font-size:12px;text-align:center;">' + r + sig + '</td>' +
+        '<td style="padding:4px 10px;font-size:12px;text-align:center;">' + p + '</td>' +
+        '<td style="padding:4px 10px;font-size:12px;text-align:center;">' + n + '/10</td>' +
+        '</tr>';
+    });
+    document.getElementById('ai-dose-response-rationale').innerHTML =
+      '<div style="font-size:12px;color:#6B6B6B;margin-bottom:6px;">Spearman |r|이 가장 큰 피처를 자동 선택합니다.</div>' +
+      '<table style="width:100%;border-collapse:collapse;border:1px solid #E8E5E0;border-radius:6px;overflow:hidden;">' +
+      '<thead><tr style="background:#FAF9F6;">' +
+      '<th style="padding:5px 10px;font-size:11px;font-weight:500;color:#6B6B6B;text-align:left;">피처</th>' +
+      '<th style="padding:5px 10px;font-size:11px;font-weight:500;color:#6B6B6B;text-align:center;">Spearman r</th>' +
+      '<th style="padding:5px 10px;font-size:11px;font-weight:500;color:#6B6B6B;text-align:center;">p-value</th>' +
+      '<th style="padding:5px 10px;font-size:11px;font-weight:500;color:#6B6B6B;text-align:center;">농도 수</th>' +
+      '</tr></thead><tbody>' + rows.join('') + '</tbody></table>';
+
     if (!cc || cc.logConcs.length < 2) {
       document.getElementById('ai-dose-response-chart').innerHTML = '<div style="text-align:center;padding:60px 20px;color:#9E9E9E;font-size:13px;">데이터 부족</div>';
       return;
