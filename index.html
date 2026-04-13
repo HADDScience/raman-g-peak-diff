@@ -880,12 +880,12 @@ input[type="range"]::-moz-range-thumb {
 
       <!-- Substrate folder mode -->
       <div id="ai-substrate-mode">
+        <input type="file" id="ai-substrate-input" webkitdirectory multiple style="display:none;">
         <div class="upload-area" id="ai-substrate-upload-area" style="padding:32px 28px;">
           <span class="icon">&#x1F4C2;</span>
           <p>기판 폴더를 선택하세요</p>
           <p class="format-hint">예: <code>Ⅰ. SiO2 wafer+FeCl3</code> — A. Fibril / B. Control 자동 감지</p>
           <button class="btn-upload" id="btn-ai-substrate">폴더 선택</button>
-          <input type="file" id="ai-substrate-input" webkitdirectory multiple>
           <div class="file-info" id="ai-substrate-info"></div>
         </div>
       </div>
@@ -899,12 +899,12 @@ input[type="range"]::-moz-range-thumb {
               Fibril 폴더
               <span class="label-badge experimental">실험군</span>
             </span>
+            <input type="file" id="ai-fibril-input" webkitdirectory multiple style="display:none;">
             <div class="upload-area" id="ai-fibril-upload-area">
               <span class="icon">&#x1F4C2;</span>
               <p>Fibril 폴더를 선택하세요</p>
               <p class="format-hint">농도별 하위폴더 포함 (OMx500 자동 감지)</p>
               <button class="btn-upload" id="btn-ai-fibril">폴더 선택</button>
-              <input type="file" id="ai-fibril-input" webkitdirectory multiple>
               <div class="file-info" id="ai-fibril-info"></div>
             </div>
           </div>
@@ -914,12 +914,12 @@ input[type="range"]::-moz-range-thumb {
               Control 폴더
               <span class="label-badge control">대조군</span>
             </span>
+            <input type="file" id="ai-control-input" webkitdirectory multiple style="display:none;">
             <div class="upload-area" id="ai-control-upload-area">
               <span class="icon">&#x1F4C2;</span>
               <p>Control 폴더를 선택하세요</p>
               <p class="format-hint">농도별 하위폴더 포함 (OMx500 자동 감지)</p>
               <button class="btn-upload" id="btn-ai-control">폴더 선택</button>
-              <input type="file" id="ai-control-input" webkitdirectory multiple>
               <div class="file-info" id="ai-control-info"></div>
             </div>
           </div>
