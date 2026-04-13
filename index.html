@@ -1858,21 +1858,40 @@ input[type="range"]::-moz-range-thumb {
 
   function calcFWHM(wavelengths, spectrum, peakIdx) {
     if (peakIdx < 0) return NaN;
+    // G-peak 범위 내에서만 탐색 (베이스라인 보정)
+    var gMin = G_RANGE[0], gMax = G_RANGE[1];
+    var leftBound = 0, rightBound = wavelengths.length - 1;
+    for (var b = 0; b < wavelengths.length; b++) {
+      if (wavelengths[b] >= gMin) { leftBound = b; break; }
+    }
+    for (var b2 = wavelengths.length - 1; b2 >= 0; b2--) {
+      if (wavelengths[b2] <= gMax) { rightBound = b2; break; }
+    }
     var peakInt = spectrum[peakIdx];
-    var halfMax = peakInt / 2;
+    // 베이스라인: G-peak 범위 양쪽 끝의 최소값
+    var baseline = Math.min(spectrum[leftBound], spectrum[rightBound]);
+    var halfMax = baseline + (peakInt - baseline) / 2;
+    // 왼쪽 탐색 (G range 내)
     var leftWl = wavelengths[peakIdx];
-    for (var i = peakIdx; i >= 1; i--) {
+    for (var i = peakIdx; i >= leftBound + 1; i--) {
       if (spectrum[i] <= halfMax) {
-        var t = (halfMax - spectrum[i]) / (spectrum[i+1] - spectrum[i]);
-        leftWl = wavelengths[i] + t * (wavelengths[i+1] - wavelengths[i]);
+        var denom = spectrum[i+1] - spectrum[i];
+        if (Math.abs(denom) > 1e-10) {
+          var t = (halfMax - spectrum[i]) / denom;
+          leftWl = wavelengths[i] + t * (wavelengths[i+1] - wavelengths[i]);
+        }
         break;
       }
     }
+    // 오른쪽 탐색 (G range 내)
     var rightWl = wavelengths[peakIdx];
-    for (var j = peakIdx; j < wavelengths.length - 1; j++) {
+    for (var j = peakIdx; j <= rightBound - 1; j++) {
       if (spectrum[j] <= halfMax) {
-        var t2 = (halfMax - spectrum[j]) / (spectrum[j-1] - spectrum[j]);
-        rightWl = wavelengths[j] - t2 * (wavelengths[j] - wavelengths[j-1]);
+        var denom2 = spectrum[j-1] - spectrum[j];
+        if (Math.abs(denom2) > 1e-10) {
+          var t2 = (halfMax - spectrum[j]) / denom2;
+          rightWl = wavelengths[j] - t2 * (wavelengths[j] - wavelengths[j-1]);
+        }
         break;
       }
     }
