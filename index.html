@@ -669,7 +669,7 @@ input[type="range"]::-moz-range-thumb {
 /* Charts row */
 .ai-charts-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -799,7 +799,7 @@ input[type="range"]::-moz-range-thumb {
   .upload-area { padding: 28px 18px; }
   .raw-upload-grid { grid-template-columns: 1fr; }
   .ai-folder-grid { grid-template-columns: 1fr; }
-  .ai-charts-row { grid-template-columns: 1fr; }
+  /* already 1fr */
   .ai-feature-table { font-size: 12px; }
   .ai-feature-table th, .ai-feature-table td { padding: 8px 8px; }
   .ai-overview-row { gap: 6px; }
@@ -1646,7 +1646,7 @@ input[type="range"]::-moz-range-thumb {
   // ─── AI Multi-Concentration Analysis Mode ──────────────────────
   // ═══════════════════════════════════════════════════════════════
 
-  var KNOWN_CONCS = ['1fM','10fM','100fM','1pM','10pM','100pM','1nM','10nM','100nM','\u00B5M'];
+  var KNOWN_CONCS = ['1fM','10fM','100fM','1pM','10pM','100pM','1nM','10nM','100nM','1\u00B5M'];
   var KNOWN_CONCS_DISPLAY = ['1fM','10fM','100fM','1pM','10pM','100pM','1nM','10nM','100nM','1\u00B5M'];
   // Map concentration labels to molar values for log axis
   var CONC_MOLAR = {
