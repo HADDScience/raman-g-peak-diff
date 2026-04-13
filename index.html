@@ -2116,17 +2116,17 @@ input[type="range"]::-moz-range-thumb {
       crossConc[key] = { diffs: diffs, logConcs: logConcs, labels: concLabelsUsed, r: sp.r, p: sp.p };
     });
 
-    // Detection limit: first conc where |mean_diff| > 3 * control_std for best feature
+    // 농도-반응 곡선용: Spearman |r|이 가장 큰 피처 선택
     var bestFeatureKey = null;
-    var bestAbsD = 0;
-    concResults.forEach(function(cr) {
-      cr.featureResults.forEach(function(fr) {
-        if (!isNaN(fr.d) && Math.abs(fr.d) > bestAbsD) {
-          bestAbsD = Math.abs(fr.d);
-          bestFeatureKey = fr.key;
-        }
-      });
+    var bestAbsR = 0;
+    featureKeys.forEach(function(key) {
+      var cc = crossConc[key];
+      if (cc && !isNaN(cc.r) && Math.abs(cc.r) > bestAbsR) {
+        bestAbsR = Math.abs(cc.r);
+        bestFeatureKey = key;
+      }
     });
+    if (!bestFeatureKey) bestFeatureKey = featureKeys[0];
 
     var detectionLimit = null;
     if (bestFeatureKey) {
