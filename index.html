@@ -477,194 +477,79 @@ input[type="range"]::-moz-range-thumb {
   color: #C0392B;
 }
 
-/* Quality filter card */
-.ai-quality-card {
+/* AI Upload Grid */
+.ai-upload-section { margin-bottom: 16px; }
+.ai-folder-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.ai-folder-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 10px;
+  display: block;
+}
+.ai-folder-label .label-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Concentration checklist */
+.ai-conc-checklist {
+  margin-top: 14px;
+  padding: 16px 18px;
   background: #FAF9F6;
   border: 1px solid #E8E5E0;
   border-radius: 10px;
-  padding: 20px 22px;
-  margin-bottom: 16px;
 }
-.ai-quality-card h4 {
+.ai-conc-checklist h4 {
   font-size: 13px;
   font-weight: 700;
   color: #1A1A1A;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+}
+.ai-conc-grid {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
-.ai-quality-card h4 .phase-badge {
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
+.ai-conc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #E07A3A, #C0392B);
-  color: #fff;
-  letter-spacing: 0.5px;
-}
-.quality-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-  font-size: 13px;
-}
-.quality-row .q-label {
-  width: 60px;
-  font-weight: 600;
-  color: #1A1A1A;
-  flex-shrink: 0;
-}
-.quality-row .q-numbers {
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #E8E5E0;
+  background: #fff;
   color: #6B6B6B;
-  flex-shrink: 0;
-  min-width: 160px;
+  transition: all 0.2s;
 }
-.quality-row .q-bar-wrap {
-  flex: 1;
-  background: #E8E5E0;
-  border-radius: 4px;
-  height: 8px;
-  overflow: hidden;
-}
-.quality-row .q-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #E07A3A, #C0392B);
-  transition: width 0.6s ease;
-}
-.quality-row .q-pct {
-  font-size: 12px;
-  font-weight: 700;
-  color: #E07A3A;
-  min-width: 40px;
-  text-align: right;
-  flex-shrink: 0;
-}
-.quality-total {
-  margin-top: 10px;
-  font-size: 12px;
-  color: #9E9E9E;
-  border-top: 1px solid #E8E5E0;
-  padding-top: 10px;
-}
-
-/* Feature comparison table */
-.ai-feature-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  margin-bottom: 0;
-}
-.ai-feature-table th {
-  background: #FAF9F6;
-  padding: 10px 12px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 12px;
-  color: #6B6B6B;
-  border-bottom: 2px solid #E8E5E0;
-  white-space: nowrap;
-}
-.ai-feature-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid #F0EDE8;
-  vertical-align: middle;
-}
-.ai-feature-table tr:last-child td { border-bottom: none; }
-.ai-feature-table tr.sig-row {
-  background: #F1FBF2;
-}
-.ai-feature-table tr.sig-row td:first-child {
-  border-left: 3px solid #43A047;
-}
-.sig-star {
-  display: inline-block;
-  margin-left: 5px;
-  color: #43A047;
-  font-weight: 700;
-  font-size: 14px;
-}
-.p-value-sig { color: #2E7D32; font-weight: 700; }
-.p-value-ns   { color: #9E9E9E; }
-.effect-large  { color: #C62828; font-weight: 700; }
-.effect-medium { color: #E07A3A; font-weight: 600; }
-.effect-small  { color: #9E9E9E; }
-
-/* AI Verdict Card */
-.ai-verdict-card {
-  border-radius: 12px;
-  padding: 22px 26px;
-  margin-top: 20px;
-  border: 1px solid transparent;
-  position: relative;
-  overflow: hidden;
-}
-.ai-verdict-card.signal-found {
-  background: linear-gradient(135deg, #E8F5E9 0%, #F1FBF2 100%);
+.ai-conc-chip.found {
   border-color: #A5D6A7;
+  background: #F1FBF2;
+  color: #2E7D32;
 }
-.ai-verdict-card.signal-none {
-  background: #F5F5F5;
-  border-color: #E0E0E0;
-}
-.ai-verdict-card .verdict-title {
-  font-size: 15px;
+.ai-conc-chip.found::before {
+  content: "\2713";
   font-weight: 700;
-  margin-bottom: 10px;
-  color: #1A1A1A;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: #43A047;
 }
-.ai-verdict-card.signal-found .verdict-signal-indicator {
-  display: inline-block;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: #43A047;
-  box-shadow: 0 0 0 3px rgba(67,160,71,0.2);
-}
-.ai-verdict-card.signal-none .verdict-signal-indicator {
-  display: inline-block;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: #9E9E9E;
-}
-.ai-verdict-card .verdict-body {
-  font-size: 13px;
-  color: #3A3A3A;
-  line-height: 1.7;
-}
-.ai-verdict-card .verdict-body ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.ai-verdict-card .verdict-body li {
-  padding: 2px 0;
-}
-.ai-verdict-card .verdict-body li::before {
-  content: "•";
-  margin-right: 7px;
-  color: #E07A3A;
-  font-weight: 700;
+.ai-conc-chip.missing::before {
+  content: "\2013";
+  color: #BDBDBD;
 }
 
-/* AI results area */
-#ai-results {
-  display: none;
-}
-#ai-results.visible { display: block; }
-
-/* Boxplot area */
-#ai-boxplot-container {
-  width: 100%;
-  min-height: 340px;
-}
-
-/* AI analyze btn */
+/* AI Analyze Button */
 .btn-ai-analyze {
   display: block;
   width: 100%;
@@ -693,6 +578,186 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: none;
 }
 
+/* AI Results area */
+#ai-results { display: none; }
+#ai-results.visible { display: block; }
+
+/* Overview badges row */
+.ai-overview-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  justify-content: center;
+}
+.ai-overview-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #E8E5E0;
+  min-width: 72px;
+  transition: box-shadow 0.2s;
+}
+.ai-overview-pill:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.ai-overview-pill .pill-conc {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 4px;
+}
+.ai-overview-pill .pill-score {
+  font-size: 11px;
+  font-weight: 600;
+}
+.ai-overview-pill.score-green .pill-score { color: #2E7D32; }
+.ai-overview-pill.score-yellow .pill-score { color: #E6A817; }
+.ai-overview-pill.score-red .pill-score { color: #C62828; }
+.ai-overview-pill.score-gray .pill-score { color: #BDBDBD; }
+.ai-overview-pill.score-green { border-color: #A5D6A7; }
+.ai-overview-pill.score-yellow { border-color: #FFE082; }
+.ai-overview-pill.score-red { border-color: #EF9A9A; }
+
+.ai-summary-line {
+  text-align: center;
+  font-size: 13px;
+  color: #6B6B6B;
+  margin-bottom: 4px;
+  line-height: 1.7;
+}
+.ai-summary-line strong {
+  color: #1A1A1A;
+  font-weight: 600;
+}
+
+/* Charts row */
+.ai-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.ai-chart-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #E8E5E0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  padding: 20px;
+}
+.ai-chart-card .chart-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 12px;
+}
+
+/* Concentration detail tabs - minimal text only */
+.ai-conc-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border-bottom: 1px solid #E8E5E0;
+  margin-bottom: 20px;
+}
+.ai-conc-tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B6B6B;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ai-conc-tab:hover {
+  color: #1A1A1A;
+}
+.ai-conc-tab.active {
+  color: #E07A3A;
+  font-weight: 700;
+  border-bottom-color: #E07A3A;
+}
+
+/* Concentration detail content */
+.ai-conc-detail { display: none; }
+.ai-conc-detail.visible { display: block; }
+.ai-detail-quality {
+  font-size: 13px;
+  color: #6B6B6B;
+  margin-bottom: 14px;
+}
+.ai-detail-quality strong { color: #1A1A1A; }
+
+/* Feature comparison mini-table */
+.ai-feature-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.ai-feature-table th {
+  background: #FAF9F6;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: #6B6B6B;
+  border-bottom: 2px solid #E8E5E0;
+  white-space: nowrap;
+}
+.ai-feature-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #F0EDE8;
+  vertical-align: middle;
+}
+.ai-feature-table tr:last-child td { border-bottom: none; }
+.ai-feature-table tr.sig-row { background: #F1FBF2; }
+.ai-feature-table tr.sig-row td:first-child { border-left: 3px solid #43A047; }
+.p-value-sig { color: #2E7D32; font-weight: 700; }
+.p-value-ns { color: #9E9E9E; }
+.effect-large { color: #C62828; font-weight: 700; }
+.effect-medium { color: #E07A3A; font-weight: 600; }
+.effect-small { color: #9E9E9E; }
+
+/* Open summary card */
+.ai-summary-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #E8E5E0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  padding: 22px 26px;
+  margin-top: 20px;
+}
+.ai-summary-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 14px;
+}
+.ai-summary-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ai-summary-card li {
+  padding: 3px 0;
+  font-size: 13px;
+  color: #3A3A3A;
+  line-height: 1.7;
+}
+.ai-summary-card li::before {
+  content: "\2022";
+  margin-right: 8px;
+  color: #E07A3A;
+  font-weight: 700;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container { padding: 24px 14px 40px; }
@@ -701,8 +766,13 @@ input[type="range"]::-moz-range-thumb {
   .settings-row { flex-direction: column; gap: 18px; }
   .upload-area { padding: 28px 18px; }
   .raw-upload-grid { grid-template-columns: 1fr; }
+  .ai-folder-grid { grid-template-columns: 1fr; }
+  .ai-charts-row { grid-template-columns: 1fr; }
   .ai-feature-table { font-size: 12px; }
   .ai-feature-table th, .ai-feature-table td { padding: 8px 8px; }
+  .ai-overview-row { gap: 6px; }
+  .ai-overview-pill { min-width: 60px; padding: 8px 10px; }
+  .ai-conc-tab { padding: 6px 10px; font-size: 12px; }
 }
 </style>
 </head>
@@ -786,40 +856,47 @@ input[type="range"]::-moz-range-thumb {
 
     <!-- AI Analysis Mode -->
     <div id="ai-mode" style="display:none;">
-      <div class="raw-upload-grid">
-        <!-- AI Fibril -->
-        <div>
-          <span class="raw-upload-label">
-            Fibril CSV
-            <span class="label-badge experimental">실험군</span>
-          </span>
-          <div class="upload-area" id="ai-fibril-upload-area">
-            <span class="icon">&#x1F9EC;</span>
-            <p>Fibril 데이터 CSV</p>
-            <p class="format-hint">라만 장비 로우데이터 (.csv)</p>
-            <button class="btn-upload" id="btn-ai-fibril">파일 선택</button>
-            <input type="file" id="ai-fibril-input" accept=".csv">
-            <div class="file-info" id="ai-fibril-info"></div>
+      <div class="ai-upload-section">
+        <div class="ai-folder-grid">
+          <!-- Fibril folder -->
+          <div>
+            <span class="ai-folder-label">
+              Fibril 폴더
+              <span class="label-badge experimental">실험군</span>
+            </span>
+            <div class="upload-area" id="ai-fibril-upload-area">
+              <span class="icon">&#x1F4C2;</span>
+              <p>Fibril 폴더를 선택하세요</p>
+              <p class="format-hint">농도별 하위폴더 포함 (OMx500 자동 감지)</p>
+              <button class="btn-upload" id="btn-ai-fibril">폴더 선택</button>
+              <input type="file" id="ai-fibril-input" webkitdirectory multiple>
+              <div class="file-info" id="ai-fibril-info"></div>
+            </div>
+          </div>
+          <!-- Control folder -->
+          <div>
+            <span class="ai-folder-label">
+              Control 폴더
+              <span class="label-badge control">대조군</span>
+            </span>
+            <div class="upload-area" id="ai-control-upload-area">
+              <span class="icon">&#x1F4C2;</span>
+              <p>Control 폴더를 선택하세요</p>
+              <p class="format-hint">농도별 하위폴더 포함 (OMx500 자동 감지)</p>
+              <button class="btn-upload" id="btn-ai-control">폴더 선택</button>
+              <input type="file" id="ai-control-input" webkitdirectory multiple>
+              <div class="file-info" id="ai-control-info"></div>
+            </div>
           </div>
         </div>
-        <!-- AI Control -->
-        <div>
-          <span class="raw-upload-label">
-            Control CSV
-            <span class="label-badge control">대조군</span>
-          </span>
-          <div class="upload-area" id="ai-control-upload-area">
-            <span class="icon">&#x1F9EA;</span>
-            <p>Control 데이터 CSV</p>
-            <p class="format-hint">라만 장비 로우데이터 (.csv)</p>
-            <button class="btn-upload" id="btn-ai-control">파일 선택</button>
-            <input type="file" id="ai-control-input" accept=".csv">
-            <div class="file-info" id="ai-control-info"></div>
-          </div>
+        <!-- Concentration checklist -->
+        <div class="ai-conc-checklist" id="ai-conc-checklist" style="display:none;">
+          <h4>감지된 농도</h4>
+          <div class="ai-conc-grid" id="ai-conc-grid"></div>
         </div>
       </div>
 
-      <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>AI 분석 시작</button>
+      <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>다중 농도 분석 시작</button>
     </div>
 
     <div class="error-msg" id="error-msg"></div>
@@ -883,44 +960,35 @@ input[type="range"]::-moz-range-thumb {
   <!-- AI Analysis Results -->
   <div id="ai-results">
 
-    <!-- Phase 1: Quality Filter -->
+    <!-- Overview badges -->
     <div class="card">
-      <div class="ai-quality-card" id="ai-quality-card">
-        <h4><span class="phase-badge">Phase 1</span> 스펙트럼 품질 필터링 (I2D/IG ≥ 1.0)</h4>
-        <div id="ai-quality-rows"></div>
-        <div class="quality-total" id="ai-quality-total"></div>
-      </div>
+      <div class="ai-overview-row" id="ai-overview-row"></div>
+      <div id="ai-summary-lines"></div>
+    </div>
 
-      <!-- Phase 2: Multi-Feature Comparison Table -->
-      <div style="margin-top: 8px;">
-        <div class="card-title" style="font-size:14px; margin-bottom:14px;">Phase 2 &amp; 3 — 다중 피처 비교 (Mann-Whitney U 검정)</div>
-        <div style="overflow-x:auto;">
-          <table class="ai-feature-table" id="ai-feature-table">
-            <thead>
-              <tr>
-                <th>피처</th>
-                <th>Fibril (평균±표준편차)</th>
-                <th>Control (평균±표준편차)</th>
-                <th>차이</th>
-                <th>p-value</th>
-                <th>효과크기 (d)</th>
-                <th>유의</th>
-              </tr>
-            </thead>
-            <tbody id="ai-feature-tbody"></tbody>
-          </table>
-        </div>
+    <!-- Charts row: dose-response + heatmap -->
+    <div class="ai-charts-row">
+      <div class="ai-chart-card">
+        <div class="chart-title">농도-반응 곡선 (Dose-Response)</div>
+        <div id="ai-dose-response-chart" style="width:100%;min-height:340px;"></div>
+      </div>
+      <div class="ai-chart-card">
+        <div class="chart-title">피처별 유의성 히트맵</div>
+        <div id="ai-heatmap-chart" style="width:100%;min-height:340px;"></div>
       </div>
     </div>
 
-    <!-- Feature Boxplots -->
-    <div class="card" style="padding: 20px;">
-      <div class="card-title" style="font-size:14px; margin-bottom:6px;">피처별 분포 (Box Plot)</div>
-      <div id="ai-boxplot-container"></div>
+    <!-- Concentration detail tabs -->
+    <div class="card">
+      <div class="ai-conc-tabs" id="ai-detail-tabs"></div>
+      <div id="ai-detail-content"></div>
     </div>
 
-    <!-- Verdict -->
-    <div id="ai-verdict-container"></div>
+    <!-- Open summary -->
+    <div class="ai-summary-card" id="ai-summary-card">
+      <h3>분석 요약</h3>
+      <ul id="ai-summary-bullets"></ul>
+    </div>
 
   </div>
 </div>
@@ -1558,11 +1626,22 @@ input[type="range"]::-moz-range-thumb {
 
 
   // ═══════════════════════════════════════════════════════════════
-  // ─── AI Analysis Mode ───────────────────────────────────────────
+  // ─── AI Multi-Concentration Analysis Mode ──────────────────────
   // ═══════════════════════════════════════════════════════════════
 
-  var aiFibrilData = null;   // { wavelengths, spectra }
-  var aiControlData = null;  // { wavelengths, spectra }
+  var KNOWN_CONCS = ['1fM','10fM','100fM','1pM','10pM','100pM','1nM','10nM','100nM','\u00B5M'];
+  var KNOWN_CONCS_DISPLAY = ['1fM','10fM','100fM','1pM','10pM','100pM','1nM','10nM','100nM','1\u00B5M'];
+  // Map concentration labels to molar values for log axis
+  var CONC_MOLAR = {
+    '1fM':1e-15,'10fM':1e-14,'100fM':1e-13,
+    '1pM':1e-12,'10pM':1e-11,'100pM':1e-10,
+    '1nM':1e-9,'10nM':1e-8,'100nM':1e-7,
+    '1\u00B5M':1e-6,'\u00B5M':1e-6
+  };
+
+  // Folder data stores: { concLabel: { wavelengths, spectra } }
+  var aiFibrilFolders = {};
+  var aiControlFolders = {};
 
   // Peak ranges
   var D_RANGE  = [1300, 1400];
@@ -1580,64 +1659,166 @@ input[type="range"]::-moz-range-thumb {
   var aiControlInfo       = document.getElementById('ai-control-info');
   var btnAiAnalyze        = document.getElementById('btn-ai-analyze');
 
-  function setupAiUploadArea(area, input, btn, infoEl, which) {
+  function setupAiFolderUpload(area, input, btn, infoEl, which) {
     btn.addEventListener('click', function(e) { e.stopPropagation(); input.click(); });
     area.addEventListener('click', function() { input.click(); });
     area.addEventListener('dragover', function(e) { e.preventDefault(); area.classList.add('drag-over'); });
     area.addEventListener('dragleave', function() { area.classList.remove('drag-over'); });
-    area.addEventListener('drop', function(e) {
-      e.preventDefault();
-      area.classList.remove('drag-over');
-      if (e.dataTransfer.files.length) handleAiFile(e.dataTransfer.files[0], which, area, infoEl);
-    });
     input.addEventListener('change', function() {
-      if (input.files.length) handleAiFile(input.files[0], which, area, infoEl);
+      if (input.files.length) handleAiFolderUpload(input.files, which, area, infoEl);
     });
   }
 
-  setupAiUploadArea(aiFibrilUploadArea, aiFibrilInput, btnAiFibril, aiFibrilInfo, 'fibril');
-  setupAiUploadArea(aiControlUploadArea, aiControlInput, btnAiControl, aiControlInfo, 'control');
+  setupAiFolderUpload(aiFibrilUploadArea, aiFibrilInput, btnAiFibril, aiFibrilInfo, 'fibril');
+  setupAiFolderUpload(aiControlUploadArea, aiControlInput, btnAiControl, aiControlInfo, 'control');
 
-  function handleAiFile(file, which, area, infoEl) {
+  function detectConcentration(relativePath) {
+    // Path pattern: rootFolder/concentration/OMx500/AUTO_xxx.csv
+    var parts = relativePath.split('/');
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i].trim();
+      // Normalize: replace micro sign variants
+      var normalized = p.replace(/[uU]\u00B5?[mM]$/,'').replace(/\u00B5/g,'u').replace(/\u03BC/g,'u');
+      for (var j = 0; j < KNOWN_CONCS.length; j++) {
+        var kn = KNOWN_CONCS[j].replace(/\u00B5/g,'u');
+        if (p === KNOWN_CONCS[j] || p === KNOWN_CONCS_DISPLAY[j] || normalized === kn ||
+            p.toLowerCase() === KNOWN_CONCS[j].toLowerCase() ||
+            p.toLowerCase() === KNOWN_CONCS_DISPLAY[j].toLowerCase() ||
+            p.replace(/[uU]M$/i,'uM') === kn.replace(/[uU]M$/i,'uM')) {
+          return KNOWN_CONCS_DISPLAY[j];
+        }
+      }
+      // Try pattern like "1uM" -> "1µM"
+      var m = p.match(/^(\d+)(f|p|n|u|µ)(M|m)$/i);
+      if (m) {
+        var num = m[1];
+        var unit = m[2].toLowerCase().replace('u','\u00B5').replace('\u03BC','\u00B5');
+        var candidate = num + unit + 'M';
+        for (var k = 0; k < KNOWN_CONCS_DISPLAY.length; k++) {
+          if (KNOWN_CONCS_DISPLAY[k] === candidate) return candidate;
+        }
+      }
+    }
+    return null;
+  }
+
+  function isOMx500File(relativePath) {
+    var lower = relativePath.toLowerCase();
+    // Must be inside OMx500 subfolder, not OMx100
+    if (lower.indexOf('omx500') !== -1 || lower.indexOf('om x500') !== -1 || lower.indexOf('om_x500') !== -1) return true;
+    // If there's no OMx100 or OMx500 indicator, check if there's no magnification folder at all (accept it)
+    if (lower.indexOf('omx100') === -1 && lower.indexOf('om x100') === -1 && lower.indexOf('om_x100') === -1 &&
+        lower.indexOf('omx500') === -1 && lower.indexOf('om x500') === -1 && lower.indexOf('om_x500') === -1) {
+      // No magnification folder structure: if it's a CSV in a concentration folder, accept it
+      return true;
+    }
+    return false;
+  }
+
+  function handleAiFolderUpload(files, which, area, infoEl) {
     hideError();
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      showError('CSV 파일만 지원합니다.');
+    var concMap = {}; // concLabel -> [File]
+    var totalCSV = 0;
+
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (!f.name.toLowerCase().endsWith('.csv')) continue;
+      var relPath = f.webkitRelativePath || f.name;
+      if (!isOMx500File(relPath)) continue;
+      var conc = detectConcentration(relPath);
+      if (!conc) continue;
+      if (!concMap[conc]) concMap[conc] = [];
+      concMap[conc].push(f);
+      totalCSV++;
+    }
+
+    var concLabels = Object.keys(concMap);
+    if (concLabels.length === 0) {
+      showError('OMx500 폴더 내 농도별 CSV 파일을 찾을 수 없습니다. 폴더 구조를 확인하세요.');
       return;
     }
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        var parsed = parseRamanCSV(e.target.result);
-        if (!parsed.wavelengths || parsed.wavelengths.length === 0) {
-          showError('Wavelength 데이터를 찾을 수 없습니다.');
-          return;
-        }
-        if (parsed.spectra.length === 0) {
-          showError('Intensity 데이터를 찾을 수 없습니다.');
-          return;
-        }
-        if (which === 'fibril') {
-          aiFibrilData = parsed;
-        } else {
-          aiControlData = parsed;
-        }
-        area.classList.add('file-loaded');
-        infoEl.innerHTML = '<span class="filename">' + file.name + '</span> &mdash; ' + parsed.spectra.length + '개 스펙트럼';
-        updateAiAnalyzeButton();
-      } catch(err) {
-        showError('파일 파싱 오류: ' + err.message);
+
+    area.classList.add('file-loaded');
+    infoEl.innerHTML = '<span class="filename">' + concLabels.length + '개 농도</span> &mdash; ' + totalCSV + '개 CSV 파일';
+
+    // Read and parse all files per concentration
+    var store = which === 'fibril' ? aiFibrilFolders : aiControlFolders;
+    // Clear previous
+    if (which === 'fibril') { aiFibrilFolders = {}; store = aiFibrilFolders; }
+    else { aiControlFolders = {}; store = aiControlFolders; }
+
+    var pending = totalCSV;
+    concLabels.forEach(function(conc) {
+      store[conc] = { wavelengths: null, spectra: [] };
+      concMap[conc].forEach(function(file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            var parsed = parseRamanCSV(e.target.result);
+            if (parsed.wavelengths && parsed.wavelengths.length > 0) {
+              if (!store[conc].wavelengths) {
+                store[conc].wavelengths = parsed.wavelengths;
+              }
+              parsed.spectra.forEach(function(sp) { store[conc].spectra.push(sp); });
+            }
+          } catch(err) { /* skip bad files */ }
+          pending--;
+          if (pending === 0) {
+            updateConcChecklist();
+            updateAiAnalyzeButton();
+          }
+        };
+        reader.onerror = function() {
+          pending--;
+          if (pending === 0) {
+            updateConcChecklist();
+            updateAiAnalyzeButton();
+          }
+        };
+        reader.readAsText(file, 'utf-8');
+      });
+    });
+  }
+
+  function updateConcChecklist() {
+    var checklist = document.getElementById('ai-conc-checklist');
+    var grid = document.getElementById('ai-conc-grid');
+    var html = '';
+    var anyFound = false;
+    KNOWN_CONCS_DISPLAY.forEach(function(conc) {
+      var hasFibril = aiFibrilFolders[conc] && aiFibrilFolders[conc].spectra.length > 0;
+      var hasControl = aiControlFolders[conc] && aiControlFolders[conc].spectra.length > 0;
+      var both = hasFibril && hasControl;
+      if (hasFibril || hasControl) anyFound = true;
+      var cls = both ? 'found' : 'missing';
+      var detail = '';
+      if (both) {
+        detail = ' (' + aiFibrilFolders[conc].spectra.length + '/' + aiControlFolders[conc].spectra.length + ')';
+      } else if (hasFibril) {
+        detail = ' (F:' + aiFibrilFolders[conc].spectra.length + ')';
+      } else if (hasControl) {
+        detail = ' (C:' + aiControlFolders[conc].spectra.length + ')';
       }
-    };
-    reader.onerror = function() { showError('파일을 읽을 수 없습니다.'); };
-    reader.readAsText(file, 'utf-8');
+      html += '<span class="ai-conc-chip ' + cls + '">' + conc + detail + '</span>';
+    });
+    grid.innerHTML = html;
+    checklist.style.display = anyFound ? '' : 'none';
   }
 
   function updateAiAnalyzeButton() {
-    btnAiAnalyze.disabled = !(aiFibrilData && aiControlData);
+    // Need at least one matching concentration with both Fibril and Control
+    var anyPair = false;
+    KNOWN_CONCS_DISPLAY.forEach(function(conc) {
+      if (aiFibrilFolders[conc] && aiFibrilFolders[conc].spectra.length > 0 &&
+          aiControlFolders[conc] && aiControlFolders[conc].spectra.length > 0) {
+        anyPair = true;
+      }
+    });
+    btnAiAnalyze.disabled = !anyPair;
   }
 
   btnAiAnalyze.addEventListener('click', function() {
-    runAiAnalysis();
+    runAiMultiAnalysis();
   });
 
   // ─── Peak Utilities ───
@@ -1662,17 +1843,14 @@ input[type="range"]::-moz-range-thumb {
     if (peakIdx < 0) return NaN;
     var peakInt = spectrum[peakIdx];
     var halfMax = peakInt / 2;
-    // Find left half-max crossing
     var leftWl = wavelengths[peakIdx];
     for (var i = peakIdx; i >= 1; i--) {
       if (spectrum[i] <= halfMax) {
-        // Interpolate between i and i+1
         var t = (halfMax - spectrum[i]) / (spectrum[i+1] - spectrum[i]);
         leftWl = wavelengths[i] + t * (wavelengths[i+1] - wavelengths[i]);
         break;
       }
     }
-    // Find right half-max crossing
     var rightWl = wavelengths[peakIdx];
     for (var j = peakIdx; j < wavelengths.length - 1; j++) {
       if (spectrum[j] <= halfMax) {
@@ -1704,23 +1882,16 @@ input[type="range"]::-moz-range-thumb {
     return { filtered: filtered, ratios: ratios, nBefore: spectra.length, nAfter: filtered.length };
   }
 
-  // ─── Phase 2: Feature Extraction per spectrum ───
+  // ─── Phase 2: Feature Extraction ───
   function extractFeatures(wavelengths, spectrum) {
     var g = findPeakInRange(wavelengths, spectrum, G_RANGE[0], G_RANGE[1]);
     var d = findPeakInRange(wavelengths, spectrum, D_RANGE[0], D_RANGE[1]);
     var d2 = findPeakInRange(wavelengths, spectrum, D2_RANGE[0], D2_RANGE[1]);
-
     var g_position = g ? g.position : NaN;
     var g_fwhm = (g && g.index >= 0) ? calcFWHM(wavelengths, spectrum, g.index) : NaN;
     var d_g_ratio  = (d && g && g.intensity > 0) ? d.intensity / g.intensity : NaN;
     var i2d_ig_ratio = (d2 && g && g.intensity > 0) ? d2.intensity / g.intensity : NaN;
-
-    return {
-      g_position:   g_position,
-      g_fwhm:       g_fwhm,
-      d_g_ratio:    d_g_ratio,
-      i2d_ig_ratio: i2d_ig_ratio
-    };
+    return { g_position: g_position, g_fwhm: g_fwhm, d_g_ratio: d_g_ratio, i2d_ig_ratio: i2d_ig_ratio };
   }
 
   function extractAllFeatures(wavelengths, spectra) {
@@ -1736,7 +1907,6 @@ input[type="range"]::-moz-range-thumb {
     if (!arr.length) return NaN;
     return arr.reduce(function(s, v) { return s + v; }, 0) / arr.length;
   }
-
   function stdDev(arr) {
     if (arr.length < 2) return NaN;
     var m = mean(arr);
@@ -1744,7 +1914,6 @@ input[type="range"]::-moz-range-thumb {
     return Math.sqrt(variance);
   }
 
-  // Abramowitz & Stegun approximation for normal CDF
   function normalCDF(z) {
     if (z < 0) return 1 - normalCDF(-z);
     var t = 1 / (1 + 0.2316419 * z);
@@ -1759,8 +1928,6 @@ input[type="range"]::-moz-range-thumb {
   function mannWhitneyU(a, b) {
     var n1 = a.length, n2 = b.length;
     if (n1 === 0 || n2 === 0) return { U: NaN, p: NaN };
-
-    // Count rank sum: U1 = sum of (# b values < each a value)
     var U1 = 0;
     for (var i = 0; i < n1; i++) {
       for (var j = 0; j < n2; j++) {
@@ -1770,8 +1937,6 @@ input[type="range"]::-moz-range-thumb {
     }
     var U2 = n1 * n2 - U1;
     var U = Math.min(U1, U2);
-
-    // Normal approximation
     var mu = n1 * n2 / 2;
     var sigma = Math.sqrt(n1 * n2 * (n1 + n2 + 1) / 12);
     if (sigma === 0) return { U: U, p: 1 };
@@ -1790,258 +1955,497 @@ input[type="range"]::-moz-range-thumb {
     return (ma - mb) / pooled;
   }
 
-  // ─── AI Analysis Runner ───
-  function runAiAnalysis() {
+  // ─── Phase 4: Spearman Correlation ───
+  function rankArray(arr) {
+    var indexed = arr.map(function(v, i) { return { v: v, i: i }; });
+    indexed.sort(function(a, b) { return a.v - b.v; });
+    var ranks = new Array(arr.length);
+    var i = 0;
+    while (i < indexed.length) {
+      var j = i;
+      while (j < indexed.length && indexed[j].v === indexed[i].v) j++;
+      var avgRank = (i + j - 1) / 2 + 1;
+      for (var k = i; k < j; k++) ranks[indexed[k].i] = avgRank;
+      i = j;
+    }
+    return ranks;
+  }
+
+  function pearsonR(x, y) {
+    var n = x.length;
+    if (n < 3) return { r: NaN, p: NaN };
+    var mx = mean(x), my = mean(y);
+    var num = 0, dx2 = 0, dy2 = 0;
+    for (var i = 0; i < n; i++) {
+      var dx = x[i] - mx, dy = y[i] - my;
+      num += dx * dy;
+      dx2 += dx * dx;
+      dy2 += dy * dy;
+    }
+    if (dx2 === 0 || dy2 === 0) return { r: NaN, p: NaN };
+    var r = num / Math.sqrt(dx2 * dy2);
+    // t-test for significance
+    var t = r * Math.sqrt((n - 2) / (1 - r * r));
+    // Approximate p from t distribution using normal for large n
+    var p = 2 * (1 - normalCDF(Math.abs(t)));
+    return { r: r, p: p };
+  }
+
+  function spearmanCorr(x, y) {
+    if (x.length !== y.length || x.length < 3) return { r: NaN, p: NaN };
+    return pearsonR(rankArray(x), rankArray(y));
+  }
+
+  // ─── Multi-Concentration Analysis Runner ───
+  function runAiMultiAnalysis() {
     hideError();
 
-    if (!aiFibrilData || !aiControlData) {
-      showError('Fibril 및 Control CSV 파일을 모두 업로드하세요.');
+    var featureKeys = ['g_position', 'g_fwhm', 'd_g_ratio', 'i2d_ig_ratio'];
+    var featureLabels = {
+      g_position:   'G-peak 위치',
+      g_fwhm:       'G-peak FWHM',
+      d_g_ratio:    'D/G 비율',
+      i2d_ig_ratio: '2D/G 비율'
+    };
+
+    // Analyze each concentration pair
+    var concResults = []; // array of { conc, concDisplay, quality, featureResults, ... }
+
+    KNOWN_CONCS_DISPLAY.forEach(function(conc) {
+      var fData = aiFibrilFolders[conc];
+      var cData = aiControlFolders[conc];
+      if (!fData || !cData || fData.spectra.length === 0 || cData.spectra.length === 0 ||
+          !fData.wavelengths || !cData.wavelengths) return;
+
+      // Phase 1: Quality filter
+      var fibrilQ  = filterByQuality(fData.wavelengths, fData.spectra, 1.0);
+      var controlQ = filterByQuality(cData.wavelengths, cData.spectra, 1.0);
+      if (fibrilQ.nAfter === 0) { fibrilQ.filtered = fData.spectra; fibrilQ.nAfter = fData.spectra.length; }
+      if (controlQ.nAfter === 0) { controlQ.filtered = cData.spectra; controlQ.nAfter = cData.spectra.length; }
+
+      var qualityPct = (fibrilQ.nAfter + controlQ.nAfter) / (fibrilQ.nBefore + controlQ.nBefore) * 100;
+
+      // Phase 2: Feature extraction
+      var fibrilFeats  = extractAllFeatures(fData.wavelengths, fibrilQ.filtered);
+      var controlFeats = extractAllFeatures(cData.wavelengths, controlQ.filtered);
+
+      // Phase 3: Statistical comparison per feature
+      var featureResults = featureKeys.map(function(key) {
+        var fa = getFeatureColumn(fibrilFeats, key);
+        var ca = getFeatureColumn(controlFeats, key);
+        var mf = mean(fa), mc = mean(ca);
+        var sf = stdDev(fa), sc = stdDev(ca);
+        var mw = mannWhitneyU(fa, ca);
+        var cd = cohensD(fa, ca);
+        return {
+          key: key, label: featureLabels[key],
+          fibrilArr: fa, controlArr: ca,
+          mf: mf, mc: mc, sf: sf, sc: sc,
+          p: mw.p, d: cd,
+          diff: mf - mc,
+          significant: (!isNaN(mw.p) && mw.p < 0.05)
+        };
+      });
+
+      concResults.push({
+        conc: conc,
+        fibrilQ: fibrilQ,
+        controlQ: controlQ,
+        qualityPct: qualityPct,
+        featureResults: featureResults
+      });
+    });
+
+    if (concResults.length === 0) {
+      showError('Fibril과 Control 모두 존재하는 농도 쌍이 없습니다.');
       return;
     }
 
-    // Phase 1: Quality filter
-    var fibrilQ  = filterByQuality(aiFibrilData.wavelengths,  aiFibrilData.spectra,  1.0);
-    var controlQ = filterByQuality(aiControlData.wavelengths, aiControlData.spectra, 1.0);
-
-    if (fibrilQ.nAfter === 0 || controlQ.nAfter === 0) {
-      showError('품질 필터 통과 스펙트럼이 없습니다. 데이터를 확인하세요. (I2D/IG 기준 완화 필요할 수 있음)');
-      // Fall back to using all spectra if filter kills everything
-      fibrilQ.filtered  = aiFibrilData.spectra;
-      fibrilQ.nAfter    = aiFibrilData.spectra.length;
-      controlQ.filtered = aiControlData.spectra;
-      controlQ.nAfter   = aiControlData.spectra.length;
-    }
-
-    // Phase 2: Feature extraction
-    var fibrilFeats  = extractAllFeatures(aiFibrilData.wavelengths,  fibrilQ.filtered);
-    var controlFeats = extractAllFeatures(aiControlData.wavelengths, controlQ.filtered);
-
-    // Feature metadata
-    var featureKeys = ['g_position', 'g_fwhm', 'd_g_ratio', 'i2d_ig_ratio'];
-    var featureLabels = {
-      g_position:   'G-peak 위치 (cm⁻¹)',
-      g_fwhm:       'G-peak FWHM (cm⁻¹)',
-      d_g_ratio:    'D/G 강도비',
-      i2d_ig_ratio: '2D/G 강도비'
-    };
-
-    // Phase 3: Statistical comparison
-    var results = featureKeys.map(function(key) {
-      var fa = getFeatureColumn(fibrilFeats, key);
-      var ca = getFeatureColumn(controlFeats, key);
-      var mf = mean(fa), mc = mean(ca);
-      var sf = stdDev(fa), sc = stdDev(ca);
-      var mw = mannWhitneyU(fa, ca);
-      var cd = cohensD(fa, ca);
-      return {
-        key:       key,
-        label:     featureLabels[key],
-        fibrilArr: fa,
-        controlArr:ca,
-        mf: mf, mc: mc,
-        sf: sf, sc: sc,
-        p:  mw.p,
-        d:  cd,
-        significant: (!isNaN(mw.p) && mw.p < 0.05)
-      };
+    // Phase 4: Cross-concentration analysis
+    var crossConc = {};
+    featureKeys.forEach(function(key) {
+      var diffs = [], logConcs = [], concLabelsUsed = [];
+      concResults.forEach(function(cr) {
+        var fr = cr.featureResults.find(function(r) { return r.key === key; });
+        if (fr && !isNaN(fr.diff)) {
+          var molar = CONC_MOLAR[cr.conc];
+          if (molar) {
+            diffs.push(fr.diff);
+            logConcs.push(Math.log10(molar));
+            concLabelsUsed.push(cr.conc);
+          }
+        }
+      });
+      var sp = spearmanCorr(logConcs, diffs);
+      crossConc[key] = { diffs: diffs, logConcs: logConcs, labels: concLabelsUsed, r: sp.r, p: sp.p };
     });
 
+    // Detection limit: first conc where |mean_diff| > 3 * control_std for best feature
+    var bestFeatureKey = null;
+    var bestAbsD = 0;
+    concResults.forEach(function(cr) {
+      cr.featureResults.forEach(function(fr) {
+        if (!isNaN(fr.d) && Math.abs(fr.d) > bestAbsD) {
+          bestAbsD = Math.abs(fr.d);
+          bestFeatureKey = fr.key;
+        }
+      });
+    });
+
+    var detectionLimit = null;
+    if (bestFeatureKey) {
+      for (var ci = 0; ci < concResults.length; ci++) {
+        var cr = concResults[ci];
+        var fr = cr.featureResults.find(function(r) { return r.key === bestFeatureKey; });
+        if (fr && !isNaN(fr.diff) && !isNaN(fr.sc) && fr.sc > 0 && Math.abs(fr.diff) > 3 * fr.sc) {
+          detectionLimit = cr.conc;
+          break;
+        }
+      }
+    }
+
     // Render all sections
-    renderAiQualityCard(fibrilQ, controlQ);
-    renderAiFeatureTable(results);
-    renderAiBoxplots(results);
-    renderAiVerdict(results);
+    renderOverviewBadges(concResults);
+    renderSummaryLines(concResults, detectionLimit, crossConc, featureLabels, bestFeatureKey);
+    renderDoseResponseChart(concResults, crossConc, featureKeys, featureLabels, bestFeatureKey);
+    renderHeatmapChart(concResults, featureKeys, featureLabels);
+    renderDetailTabs(concResults, featureLabels);
+    renderOpenSummary(concResults, crossConc, featureLabels, bestFeatureKey, detectionLimit);
 
-    // Show the results panel
     document.getElementById('ai-results').classList.add('visible');
-
-    // Hide old chart/stats if visible
     chartPlaceholder.style.display = 'none';
   }
 
-  // ─── Render: Quality Filter Card ───
-  function renderAiQualityCard(fibrilQ, controlQ) {
-    var fPct = fibrilQ.nBefore > 0 ? (fibrilQ.nAfter / fibrilQ.nBefore * 100) : 0;
-    var cPct = controlQ.nBefore > 0 ? (controlQ.nAfter / controlQ.nBefore * 100) : 0;
-    var totalBefore = fibrilQ.nBefore + controlQ.nBefore;
-    var totalAfter  = fibrilQ.nAfter + controlQ.nAfter;
-    var totalPct = totalBefore > 0 ? (totalAfter / totalBefore * 100) : 0;
+  // ─── Render: Overview Badges ───
+  function renderOverviewBadges(concResults) {
+    var concMap = {};
+    concResults.forEach(function(cr) { concMap[cr.conc] = cr; });
 
-    function qualRow(label, nBefore, nAfter, pct) {
-      return '<div class="quality-row">' +
-        '<span class="q-label">' + label + '</span>' +
-        '<span class="q-numbers">' + nBefore + '개 → ' + nAfter + '개</span>' +
-        '<div class="q-bar-wrap"><div class="q-bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
-        '<span class="q-pct">' + pct.toFixed(1) + '%</span>' +
-        '</div>';
+    var html = '';
+    KNOWN_CONCS_DISPLAY.forEach(function(conc) {
+      var cr = concMap[conc];
+      if (!cr) {
+        html += '<div class="ai-overview-pill score-gray"><span class="pill-conc">' + conc + '</span><span class="pill-score">\u2014</span></div>';
+        return;
+      }
+      var pct = cr.qualityPct;
+      var cls = pct >= 85 ? 'score-green' : (pct >= 70 ? 'score-yellow' : 'score-red');
+      html += '<div class="ai-overview-pill ' + cls + '"><span class="pill-conc">' + conc + '</span><span class="pill-score">' + pct.toFixed(0) + '%</span></div>';
+    });
+    document.getElementById('ai-overview-row').innerHTML = html;
+  }
+
+  // ─── Render: Summary Lines ───
+  function renderSummaryLines(concResults, detectionLimit, crossConc, featureLabels, bestFeatureKey) {
+    var avgQuality = mean(concResults.map(function(cr) { return cr.qualityPct; }));
+    var nWithDiff = concResults.filter(function(cr) {
+      return cr.featureResults.some(function(fr) { return fr.significant; });
+    }).length;
+
+    var lines = [];
+    if (detectionLimit) {
+      lines.push('<strong>검출 한계:</strong> ' + detectionLimit);
+    }
+    lines.push('<strong>평균 품질:</strong> ' + avgQuality.toFixed(1) + '%');
+    lines.push('<strong>차이 관찰:</strong> ' + nWithDiff + '/' + concResults.length + '개 농도');
+
+    document.getElementById('ai-summary-lines').innerHTML = lines.map(function(l) {
+      return '<div class="ai-summary-line">' + l + '</div>';
+    }).join('');
+  }
+
+  // ─── Render: Dose-Response Chart ───
+  function renderDoseResponseChart(concResults, crossConc, featureKeys, featureLabels, bestFeatureKey) {
+    var key = bestFeatureKey || featureKeys[0];
+    var cc = crossConc[key];
+    if (!cc || cc.logConcs.length < 2) {
+      document.getElementById('ai-dose-response-chart').innerHTML = '<div style="text-align:center;padding:60px 20px;color:#9E9E9E;font-size:13px;">데이터 부족</div>';
+      return;
     }
 
-    document.getElementById('ai-quality-rows').innerHTML =
-      qualRow('Fibril', fibrilQ.nBefore, fibrilQ.nAfter, fPct) +
-      qualRow('Control', controlQ.nBefore, controlQ.nAfter, cPct);
+    var scatterTrace = {
+      type: 'scatter',
+      mode: 'markers+lines',
+      x: cc.logConcs,
+      y: cc.diffs,
+      text: cc.labels,
+      hovertemplate: '%{text}<br>diff: %{y:.4f}<extra></extra>',
+      marker: { color: '#E07A3A', size: 9, line: { color: '#fff', width: 1.5 } },
+      line: { color: '#E07A3A', width: 2 }
+    };
 
-    document.getElementById('ai-quality-total').innerHTML =
-      '전체 ' + totalBefore + '개 스펙트럼 중 ' + totalAfter + '개 통과 (' + totalPct.toFixed(1) + '%)';
+    var rText = isNaN(cc.r) ? '' : ('r = ' + cc.r.toFixed(3) + ', p = ' + (cc.p < 0.001 ? '< 0.001' : cc.p.toFixed(3)));
+
+    var layout = {
+      xaxis: {
+        title: { text: 'log\u2081\u2080(농도, M)', font: { size: 12, color: '#6B6B6B' } },
+        tickvals: cc.logConcs,
+        ticktext: cc.labels,
+        tickangle: -45,
+        gridcolor: '#F0EDE8'
+      },
+      yaxis: {
+        title: { text: featureLabels[key] + ' (Fibril \u2212 Control)', font: { size: 12, color: '#6B6B6B' } },
+        gridcolor: '#F0EDE8'
+      },
+      annotations: [{
+        text: 'Spearman ' + rText,
+        x: 0.02, y: 0.98, xref: 'paper', yref: 'paper',
+        showarrow: false,
+        font: { size: 11, color: '#6B6B6B' },
+        bgcolor: 'rgba(255,255,255,0.85)',
+        borderpad: 4
+      }],
+      margin: { t: 20, b: 70, l: 60, r: 20 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: { family: 'Noto Sans KR' },
+      showlegend: false
+    };
+
+    Plotly.newPlot('ai-dose-response-chart', [scatterTrace], layout, { responsive: true, displayModeBar: false });
   }
 
-  // ─── Render: Feature Comparison Table ───
-  function renderAiFeatureTable(results) {
-    var rows = '';
-    results.forEach(function(r) {
-      var sigClass = r.significant ? ' class="sig-row"' : '';
-      var sigStar  = r.significant ? '<span class="sig-star">★</span>' : '';
+  // ─── Render: Heatmap Chart ───
+  function renderHeatmapChart(concResults, featureKeys, featureLabels) {
+    var concLabels = concResults.map(function(cr) { return cr.conc; });
+    var fLabels = featureKeys.map(function(k) { return featureLabels[k]; });
 
-      var pStr = isNaN(r.p) ? '—' : (r.p < 0.001 ? '< 0.001' : r.p.toFixed(3));
-      var pClass = r.significant ? 'p-value-sig' : 'p-value-ns';
-
-      var dAbs = Math.abs(r.d);
-      var dStr = isNaN(r.d) ? '—' : r.d.toFixed(3);
-      var dClass = isNaN(dAbs) ? '' : (dAbs >= 0.8 ? 'effect-large' : (dAbs >= 0.5 ? 'effect-medium' : 'effect-small'));
-
-      var mfStr = isNaN(r.mf) ? '—' : (r.mf.toFixed(2) + ' ± ' + (isNaN(r.sf) ? '—' : r.sf.toFixed(2)));
-      var mcStr = isNaN(r.mc) ? '—' : (r.mc.toFixed(2) + ' ± ' + (isNaN(r.sc) ? '—' : r.sc.toFixed(2)));
-      var diffStr = (isNaN(r.mf) || isNaN(r.mc)) ? '—' : (r.mf - r.mc).toFixed(3);
-
-      rows += '<tr' + sigClass + '>' +
-        '<td>' + r.label + sigStar + '</td>' +
-        '<td style="font-family:monospace;">' + mfStr + '</td>' +
-        '<td style="font-family:monospace;">' + mcStr + '</td>' +
-        '<td style="font-family:monospace;">' + diffStr + '</td>' +
-        '<td class="' + pClass + '">' + pStr + '</td>' +
-        '<td class="' + dClass + '">' + dStr + '</td>' +
-        '<td>' + (r.significant ? '<span style="color:#43A047;font-weight:700;">유의 *</span>' : '<span style="color:#9E9E9E;">비유의</span>') + '</td>' +
-        '</tr>';
+    // z[row=feature][col=conc] = -log10(p)
+    var z = [];
+    var annotations = [];
+    featureKeys.forEach(function(key, fi) {
+      var row = [];
+      concResults.forEach(function(cr, ci) {
+        var fr = cr.featureResults.find(function(r) { return r.key === key; });
+        var pVal = fr ? fr.p : NaN;
+        var nlog = isNaN(pVal) ? 0 : -Math.log10(Math.max(pVal, 1e-10));
+        row.push(nlog);
+        if (!isNaN(pVal) && pVal < 0.05) {
+          annotations.push({
+            x: ci, y: fi,
+            text: '*',
+            showarrow: false,
+            font: { size: 16, color: '#fff', family: 'Noto Sans KR' }
+          });
+        }
+      });
+      z.push(row);
     });
-    document.getElementById('ai-feature-tbody').innerHTML = rows;
+
+    var heatTrace = {
+      type: 'heatmap',
+      z: z,
+      x: concLabels,
+      y: fLabels,
+      colorscale: [
+        [0, '#FAF9F6'],
+        [0.3, '#FFE0B2'],
+        [0.6, '#FF8A65'],
+        [1, '#C62828']
+      ],
+      colorbar: {
+        title: { text: '-log\u2081\u2080(p)', font: { size: 11 } },
+        thickness: 14,
+        len: 0.8
+      },
+      hovertemplate: '%{y}<br>%{x}<br>-log10(p) = %{z:.2f}<extra></extra>'
+    };
+
+    var layout = {
+      annotations: annotations,
+      xaxis: { tickangle: -45, gridcolor: '#F0EDE8' },
+      yaxis: { autorange: 'reversed' },
+      margin: { t: 20, b: 70, l: 110, r: 60 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      font: { family: 'Noto Sans KR', size: 12 }
+    };
+
+    Plotly.newPlot('ai-heatmap-chart', [heatTrace], layout, { responsive: true, displayModeBar: false });
   }
 
-  // ─── Render: Boxplots ───
-  function renderAiBoxplots(results) {
-    var traces = [];
-    var featureCount = results.length;
+  // ─── Render: Concentration Detail Tabs ───
+  var activeDetailConc = null;
 
-    results.forEach(function(r, i) {
-      // x-axis position offset per group within each subplot column
+  function renderDetailTabs(concResults, featureLabels) {
+    var tabsEl = document.getElementById('ai-detail-tabs');
+    var contentEl = document.getElementById('ai-detail-content');
+
+    // Build tabs
+    var tabsHtml = '';
+    concResults.forEach(function(cr, i) {
+      var cls = i === 0 ? 'ai-conc-tab active' : 'ai-conc-tab';
+      tabsHtml += '<button class="' + cls + '" data-conc="' + cr.conc + '">' + cr.conc + '</button>';
+    });
+    tabsEl.innerHTML = tabsHtml;
+
+    // Build content for all concentrations
+    var allContentHtml = '';
+    concResults.forEach(function(cr, i) {
+      var vis = i === 0 ? ' visible' : '';
+      allContentHtml += '<div class="ai-conc-detail' + vis + '" id="ai-detail-' + cr.conc.replace(/[^a-zA-Z0-9]/g,'_') + '">';
+
+      // Quality line
+      var totalBefore = cr.fibrilQ.nBefore + cr.controlQ.nBefore;
+      var totalAfter = cr.fibrilQ.nAfter + cr.controlQ.nAfter;
+      allContentHtml += '<div class="ai-detail-quality"><strong>' + totalBefore + '개</strong> \u2192 <strong>' + totalAfter + '개</strong> (' + cr.qualityPct.toFixed(1) + '% \uD1B5\uACFC)</div>';
+
+      // Feature table
+      allContentHtml += '<div style="overflow-x:auto;"><table class="ai-feature-table"><thead><tr>' +
+        '<th>\uD53C\uCC98</th><th>Fibril</th><th>Control</th><th>p-value</th><th>\uD6A8\uACFC\uD06C\uAE30</th></tr></thead><tbody>';
+      cr.featureResults.forEach(function(fr) {
+        var sigClass = fr.significant ? ' class="sig-row"' : '';
+        var pStr = isNaN(fr.p) ? '\u2014' : (fr.p < 0.001 ? '< 0.001' : fr.p.toFixed(3));
+        var pCls = fr.significant ? 'p-value-sig' : 'p-value-ns';
+        var dAbs = Math.abs(fr.d);
+        var dStr = isNaN(fr.d) ? '\u2014' : fr.d.toFixed(3);
+        var dCls = isNaN(dAbs) ? '' : (dAbs >= 0.8 ? 'effect-large' : (dAbs >= 0.5 ? 'effect-medium' : 'effect-small'));
+        var mfStr = isNaN(fr.mf) ? '\u2014' : (fr.mf.toFixed(3) + ' \u00B1 ' + (isNaN(fr.sf) ? '\u2014' : fr.sf.toFixed(3)));
+        var mcStr = isNaN(fr.mc) ? '\u2014' : (fr.mc.toFixed(3) + ' \u00B1 ' + (isNaN(fr.sc) ? '\u2014' : fr.sc.toFixed(3)));
+        allContentHtml += '<tr' + sigClass + '>' +
+          '<td>' + fr.label + '</td>' +
+          '<td style="font-family:monospace;font-size:12px;">' + mfStr + '</td>' +
+          '<td style="font-family:monospace;font-size:12px;">' + mcStr + '</td>' +
+          '<td class="' + pCls + '">' + pStr + '</td>' +
+          '<td class="' + dCls + '">' + dStr + '</td></tr>';
+      });
+      allContentHtml += '</tbody></table></div>';
+
+      // Boxplot container
+      allContentHtml += '<div id="ai-detail-boxplot-' + cr.conc.replace(/[^a-zA-Z0-9]/g,'_') + '" style="width:100%;min-height:300px;margin-top:12px;"></div>';
+      allContentHtml += '</div>';
+    });
+    contentEl.innerHTML = allContentHtml;
+
+    // Render first boxplot
+    if (concResults.length > 0) {
+      activeDetailConc = concResults[0].conc;
+      renderDetailBoxplot(concResults[0]);
+    }
+
+    // Tab click handlers
+    tabsEl.querySelectorAll('.ai-conc-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var conc = tab.getAttribute('data-conc');
+        tabsEl.querySelectorAll('.ai-conc-tab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        contentEl.querySelectorAll('.ai-conc-detail').forEach(function(d) { d.classList.remove('visible'); });
+        var targetId = 'ai-detail-' + conc.replace(/[^a-zA-Z0-9]/g,'_');
+        var targetEl = document.getElementById(targetId);
+        if (targetEl) targetEl.classList.add('visible');
+        // Render boxplot for this conc
+        var cr = concResults.find(function(c) { return c.conc === conc; });
+        if (cr && activeDetailConc !== conc) {
+          activeDetailConc = conc;
+          renderDetailBoxplot(cr);
+        }
+      });
+    });
+  }
+
+  function renderDetailBoxplot(cr) {
+    var containerId = 'ai-detail-boxplot-' + cr.conc.replace(/[^a-zA-Z0-9]/g,'_');
+    var traces = [];
+    var featureCount = cr.featureResults.length;
+
+    cr.featureResults.forEach(function(fr, i) {
       traces.push({
-        type: 'box',
-        y: r.fibrilArr,
-        name: 'Fibril',
-        marker: { color: 'tomato' },
-        line: { color: 'tomato' },
-        fillcolor: 'rgba(255,99,71,0.25)',
-        xaxis: 'x' + (i === 0 ? '' : (i+1)),
-        yaxis: 'y' + (i === 0 ? '' : (i+1)),
-        showlegend: i === 0,
-        legendgroup: 'fibril',
-        boxpoints: 'outliers',
-        jitter: 0.3,
-        pointpos: -1.5
+        type: 'box', y: fr.fibrilArr, name: 'Fibril',
+        marker: { color: '#E07A3A' }, line: { color: '#E07A3A' },
+        fillcolor: 'rgba(224,122,58,0.2)',
+        xaxis: 'x' + (i === 0 ? '' : (i+1)), yaxis: 'y' + (i === 0 ? '' : (i+1)),
+        showlegend: i === 0, legendgroup: 'fibril',
+        boxpoints: 'outliers', jitter: 0.3, pointpos: -1.5
       });
       traces.push({
-        type: 'box',
-        y: r.controlArr,
-        name: 'Control',
-        marker: { color: 'steelblue' },
-        line: { color: 'steelblue' },
-        fillcolor: 'rgba(70,130,180,0.25)',
-        xaxis: 'x' + (i === 0 ? '' : (i+1)),
-        yaxis: 'y' + (i === 0 ? '' : (i+1)),
-        showlegend: i === 0,
-        legendgroup: 'control',
-        boxpoints: 'outliers',
-        jitter: 0.3,
-        pointpos: 1.5
+        type: 'box', y: fr.controlArr, name: 'Control',
+        marker: { color: '#4C72B0' }, line: { color: '#4C72B0' },
+        fillcolor: 'rgba(76,114,176,0.2)',
+        xaxis: 'x' + (i === 0 ? '' : (i+1)), yaxis: 'y' + (i === 0 ? '' : (i+1)),
+        showlegend: i === 0, legendgroup: 'control',
+        boxpoints: 'outliers', jitter: 0.3, pointpos: 1.5
       });
     });
 
     var colW = 1 / featureCount;
     var gap = 0.06;
     var layout = {
-      height: 340,
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      plot_bgcolor: 'rgba(0,0,0,0)',
+      height: 300,
+      paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
       font: { family: 'Noto Sans KR', size: 12 },
-      margin: { t: 48, b: 20, l: 44, r: 10 },
+      margin: { t: 40, b: 20, l: 44, r: 10 },
       legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: 1.12 },
-      showlegend: true,
-      boxmode: 'group'
+      showlegend: true, boxmode: 'group'
     };
 
-    // Set up subplot axes
-    results.forEach(function(r, i) {
-      var domainStart = i * colW + (i === 0 ? 0 : gap / 2);
-      var domainEnd   = (i + 1) * colW - (i === featureCount - 1 ? 0 : gap / 2);
-      var xKey = i === 0 ? 'xaxis' : ('xaxis' + (i+1));
-      var yKey = i === 0 ? 'yaxis' : ('yaxis' + (i+1));
-      layout[xKey] = {
-        domain: [domainStart, domainEnd],
-        showticklabels: false,
-        showgrid: false,
-        zeroline: false
-      };
-      layout[yKey] = {
-        domain: [0, 0.88],
-        title: { text: '', font: { size: 10 } },
-        gridcolor: '#F0EDE8',
-        zeroline: false
-      };
-      // Subplot title via annotation
+    cr.featureResults.forEach(function(fr, i) {
+      var ds = i * colW + (i === 0 ? 0 : gap / 2);
+      var de = (i + 1) * colW - (i === featureCount - 1 ? 0 : gap / 2);
+      var xK = i === 0 ? 'xaxis' : ('xaxis' + (i+1));
+      var yK = i === 0 ? 'yaxis' : ('yaxis' + (i+1));
+      layout[xK] = { domain: [ds, de], showticklabels: false, showgrid: false, zeroline: false };
+      layout[yK] = { domain: [0, 0.88], gridcolor: '#F0EDE8', zeroline: false };
       if (!layout.annotations) layout.annotations = [];
       layout.annotations.push({
-        text: '<b>' + r.label + '</b>' + (r.significant ? ' ★' : ''),
-        x: (domainStart + domainEnd) / 2,
-        y: 1.06,
-        xref: 'paper', yref: 'paper',
-        showarrow: false,
-        font: { size: 11, color: r.significant ? '#2E7D32' : '#6B6B6B', family: 'Noto Sans KR' }
+        text: '<b>' + fr.label + '</b>' + (fr.significant ? ' *' : ''),
+        x: (ds + de) / 2, y: 1.04, xref: 'paper', yref: 'paper', showarrow: false,
+        font: { size: 11, color: fr.significant ? '#2E7D32' : '#6B6B6B', family: 'Noto Sans KR' }
       });
     });
 
-    Plotly.newPlot('ai-boxplot-container', traces, layout, { responsive: true, displayModeBar: false });
+    Plotly.newPlot(containerId, traces, layout, { responsive: true, displayModeBar: false });
   }
 
-  // ─── Render: Verdict Card ───
-  function renderAiVerdict(results) {
-    var sigResults = results.filter(function(r) { return r.significant; });
-    var nSig = sigResults.length;
-    var nTotal = results.length;
-    var signalFound = nSig > 0;
+  // ─── Render: Open Summary ───
+  function renderOpenSummary(concResults, crossConc, featureLabels, bestFeatureKey, detectionLimit) {
+    var bullets = [];
 
-    // Find largest effect size
-    var maxEffect = null;
-    results.forEach(function(r) {
-      if (!isNaN(r.d) && (maxEffect === null || Math.abs(r.d) > Math.abs(maxEffect.d))) {
-        maxEffect = r;
+    // Count concentrations with any significant difference
+    var nWithDiff = concResults.filter(function(cr) {
+      return cr.featureResults.some(function(fr) { return fr.significant; });
+    }).length;
+    bullets.push(concResults.length + '개 농도 중 ' + nWithDiff + '개에서 Fibril/Control 간 차이 관찰');
+
+    // Strongest feature by average absolute effect size
+    var featureAvgD = {};
+    var featureKeys = ['g_position','g_fwhm','d_g_ratio','i2d_ig_ratio'];
+    featureKeys.forEach(function(key) {
+      var vals = [];
+      concResults.forEach(function(cr) {
+        var fr = cr.featureResults.find(function(r) { return r.key === key; });
+        if (fr && !isNaN(fr.d)) vals.push(Math.abs(fr.d));
+      });
+      featureAvgD[key] = vals.length > 0 ? mean(vals) : 0;
+    });
+    var strongestKey = featureKeys.reduce(function(best, k) {
+      return featureAvgD[k] > featureAvgD[best] ? k : best;
+    }, featureKeys[0]);
+    bullets.push('가장 강한 피처: ' + featureLabels[strongestKey] + ' (평균 효과크기 d=' + featureAvgD[strongestKey].toFixed(2) + ')');
+
+    // Dose-response correlation for best feature
+    featureKeys.forEach(function(key) {
+      var cc = crossConc[key];
+      if (cc && !isNaN(cc.r) && !isNaN(cc.p) && cc.p < 0.05) {
+        bullets.push('농도-반응 관계: ' + featureLabels[key] + ' (r=' + cc.r.toFixed(3) + ', p=' + (cc.p < 0.001 ? '< 0.001' : cc.p.toFixed(3)) + ')');
       }
     });
 
-    var cardClass = signalFound ? 'signal-found' : 'signal-none';
-    var signalText = signalFound ? '신호 발견' : '신호 미발견';
-
-    var bullets = [];
-    bullets.push('유의한 피처: ' + nSig + '/' + nTotal + '개');
-    if (maxEffect && !isNaN(maxEffect.d)) {
-      bullets.push('최대 효과크기: ' + maxEffect.label + ' (d = ' + Math.abs(maxEffect.d).toFixed(2) + ')');
-    }
-    if (signalFound) {
-      var sigLabels = sigResults.map(function(r) { return r.label; }).join(', ');
-      bullets.push('유의한 피처: ' + sigLabels);
-      bullets.push('판정: Fibril/Control 간 측정 가능한 라만 신호 차이가 존재합니다.');
-    } else {
-      bullets.push('판정: 현재 데이터에서 통계적으로 유의한 Fibril/Control 차이가 확인되지 않았습니다.');
+    // Detection limit
+    if (detectionLimit) {
+      bullets.push('검출 한계 (3\u03C3 기준): ' + detectionLimit);
     }
 
-    var html = '<div class="card ai-verdict-card ' + cardClass + '">' +
-      '<div class="verdict-title">' +
-      '<span class="verdict-signal-indicator"></span>' +
-      '&#x1F52C; AI 분석 결과 &mdash; <span style="margin-left:4px;">' + signalText + '</span>' +
-      '</div>' +
-      '<div class="verdict-body"><ul>' +
-      bullets.map(function(b) { return '<li>' + b + '</li>'; }).join('') +
-      '</ul></div>' +
-      '</div>';
+    // Concentrations needing more verification
+    var lowQuality = concResults.filter(function(cr) { return cr.qualityPct < 85; });
+    if (lowQuality.length > 0) {
+      var names = lowQuality.map(function(cr) { return cr.conc + ' (' + cr.qualityPct.toFixed(0) + '%)'; }).join(', ');
+      bullets.push('추가 검증이 필요한 농도: ' + names);
+    }
 
-    document.getElementById('ai-verdict-container').innerHTML = html;
+    document.getElementById('ai-summary-bullets').innerHTML = bullets.map(function(b) {
+      return '<li>' + b + '</li>';
+    }).join('');
   }
 
 })();
