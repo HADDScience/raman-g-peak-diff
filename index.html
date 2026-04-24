@@ -1944,7 +1944,7 @@ input[type="range"]::-moz-range-thumb {
           var peaks = [];
           for (var i = 0; i < spectra.length; i++){
             var r = findPeakInRange(d.wavelengths, spectra[i], minWl, maxWl);
-            if (r && !isNaN(r.pos)) peaks.push(r.pos);
+            if (r && !isNaN(r.position)) peaks.push(r.position);
           }
           if (!peaks.length) return;
           var m = mean(peaks);
@@ -2119,7 +2119,7 @@ input[type="range"]::-moz-range-thumb {
       var peaks = [];
       for (var i = 0; i < d.spectra.length; i++){
         var r = findPeakInRange(d.wavelengths, d.spectra[i], minWl, maxWl);
-        if (r && !isNaN(r.pos)) peaks.push(r.pos);
+        if (r && !isNaN(r.position)) peaks.push(r.position);
       }
       var stat;
       if (peaks.length) {
@@ -2224,7 +2224,7 @@ input[type="range"]::-moz-range-thumb {
       var peaks = [];
       for (var i = 0; i < d.spectra.length; i++){
         var r = findPeakInRange(d.wavelengths, d.spectra[i], minWl, maxWl);
-        if (r && !isNaN(r.pos)) peaks.push(r.pos);
+        if (r && !isNaN(r.position)) peaks.push(r.position);
       }
       if (!peaks.length) return;
 
