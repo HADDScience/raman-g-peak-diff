@@ -26,6 +26,159 @@ body {
   padding: 40px 20px 60px;
 }
 
+/* App Layout: sidebar + main */
+.app-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  align-items: start;
+}
+.sidebar {
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #E8E5E0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.sidebar h2 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #1A1A1A;
+}
+.main-content {
+  min-width: 0;
+}
+
+/* Wafer cards */
+.wafer-card {
+  border: 1px solid #E8E5E0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #FAF9F6;
+  transition: border-color 0.15s, background 0.15s;
+}
+.wafer-card.active {
+  border-color: #E07A3A;
+  background: #FFF5EE;
+}
+.wafer-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+.wafer-header input[type="radio"] {
+  accent-color: #E07A3A;
+  margin: 0;
+  cursor: pointer;
+}
+.wafer-name {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #1A1A1A;
+  word-break: break-all;
+}
+.wafer-name[contenteditable="true"]:focus {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #E07A3A;
+}
+.wafer-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: #6B6B6B;
+  margin-left: 24px;
+  margin-top: 6px;
+}
+.btn-remove-wafer {
+  margin-top: 8px;
+  margin-left: 24px;
+  background: transparent;
+  border: 1px solid #E8E5E0;
+  color: #C62828;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-remove-wafer:hover {
+  background: #FFF0F0;
+  border-color: #FFCDD2;
+}
+.btn-add-wafer {
+  width: 100%;
+  padding: 10px;
+  background: #E07A3A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+.btn-add-wafer:hover { background: #c96a2f; }
+.sidebar-empty {
+  padding: 14px;
+  text-align: center;
+  color: #6B6B6B;
+  font-size: 13px;
+  background: #FAF9F6;
+  border: 1px dashed #E8E5E0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+/* Active wafer banner */
+#active-wafer-banner {
+  background: #FFF5EE;
+  border: 1px solid #FFDDCC;
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #1A1A1A;
+}
+#active-wafer-banner strong {
+  color: #E07A3A;
+  font-weight: 700;
+}
+#active-wafer-banner.no-active {
+  background: #FAF9F6;
+  border-color: #E8E5E0;
+  color: #6B6B6B;
+}
+
+/* Per-wafer chart sections (PDF-style) */
+.wafer-chart-section {
+  margin-bottom: 28px;
+}
+.wafer-chart-section .wafer-chart-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #E8E5E0;
+  color: #1A1A1A;
+}
+
 h1 {
   font-size: 24px;
   font-weight: 700;
@@ -186,18 +339,6 @@ h1 {
 }
 .error-msg.visible { display: block; }
 
-/* Label badges (used by AI folder labels) */
-.label-badge.experimental {
-  background: #FFF3E0;
-  color: #E65100;
-  border: 1px solid #FFE0B2;
-}
-.label-badge.control {
-  background: #E3F2FD;
-  color: #1565C0;
-  border: 1px solid #BBDEFB;
-}
-
 /* Custom range slider */
 input[type="range"] {
   -webkit-appearance: none;
@@ -232,63 +373,6 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.18);
   cursor: pointer;
-}
-
-/* AI Upload Sub-Toggle */
-.ai-upload-toggle {
-  display: flex;
-  background: #F5F0EB;
-  border-radius: 8px;
-  padding: 3px;
-  margin-bottom: 16px;
-  gap: 3px;
-}
-.ai-upload-btn {
-  flex: 1;
-  padding: 7px 14px;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: transparent;
-  color: #6B6B6B;
-  text-align: center;
-}
-.ai-upload-btn.active {
-  background: #fff;
-  color: #1A1A1A;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.ai-upload-btn:not(.active):hover {
-  color: #1A1A1A;
-}
-
-/* AI Upload Grid */
-.ai-upload-section { margin-bottom: 16px; }
-.ai-folder-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.ai-folder-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1A1A1A;
-  margin-bottom: 10px;
-  display: block;
-}
-.ai-folder-label .label-badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 20px;
-  margin-left: 6px;
-  vertical-align: middle;
 }
 
 /* Concentration checklist */
@@ -548,11 +632,20 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Responsive */
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+  .sidebar {
+    position: static;
+    max-height: none;
+  }
+}
 @media (max-width: 768px) {
   .container { padding: 24px 14px 40px; }
   .card { padding: 20px 18px; }
   .upload-area { padding: 28px 18px; }
-  .ai-folder-grid { grid-template-columns: 1fr; }
   #raw-drilldown-content > div:last-child { grid-template-columns: 1fr !important; }
   .ai-feature-table { font-size: 12px; }
   .ai-feature-table th, .ai-feature-table td { padding: 8px 8px; }
@@ -592,191 +685,137 @@ input[type="range"]::-moz-range-thumb {
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>Raman G-Peak Diff Analyzer</h1>
-  <p class="subtitle">G-peak 차이 분포를 분석합니다</p>
-
-  <!-- Common Upload Card (공통 업로드 영역) -->
-  <div class="card" id="upload-card">
-    <div id="ai-mode">
-      <!-- Upload mode sub-toggle -->
-      <div class="ai-upload-toggle">
-        <button class="ai-upload-btn active" id="ai-upload-substrate" data-upload="substrate">기판 폴더 통째로</button>
-        <button class="ai-upload-btn" id="ai-upload-separate" data-upload="separate">Fibril / Control 따로</button>
-      </div>
-
-      <!-- Substrate folder mode -->
-      <div id="ai-substrate-mode">
-        <input type="file" id="ai-substrate-input" webkitdirectory multiple style="display:none;">
-        <div class="upload-area" id="ai-substrate-upload-area" style="padding:32px 28px;">
-          <span class="icon">&#x1F4C2;</span>
-          <p>기판 폴더를 선택하세요</p>
-          <p class="format-hint">예: <code>Ⅰ. SiO2 wafer+FeCl3</code> — A. Fibril / B. Control 자동 감지</p>
-          <button class="btn-upload" id="btn-ai-substrate">폴더 선택</button>
-          <div class="file-info" id="ai-substrate-info"></div>
-        </div>
-      </div>
-
-      <!-- Separate folder mode -->
-      <div id="ai-separate-mode" style="display:none;">
-        <div class="ai-folder-grid">
-          <!-- Fibril folder -->
-          <div>
-            <span class="ai-folder-label">
-              Fibril 폴더
-              <span class="label-badge experimental">실험군</span>
-            </span>
-            <input type="file" id="ai-fibril-input" webkitdirectory multiple style="display:none;">
-            <div class="upload-area" id="ai-fibril-upload-area">
-              <span class="icon">&#x1F4C2;</span>
-              <p>Fibril 폴더를 선택하세요</p>
-              <p class="format-hint">농도별 하위폴더 포함 (OMx500 자동 감지)</p>
-              <button class="btn-upload" id="btn-ai-fibril">폴더 선택</button>
-              <div class="file-info" id="ai-fibril-info"></div>
-            </div>
-          </div>
-          <!-- Control folder -->
-          <div>
-            <span class="ai-folder-label">
-              Control 폴더
-              <span class="label-badge control">대조군</span>
-            </span>
-            <input type="file" id="ai-control-input" webkitdirectory multiple style="display:none;">
-            <div class="upload-area" id="ai-control-upload-area">
-              <span class="icon">&#x1F4C2;</span>
-              <p>Control 폴더를 선택하세요</p>
-              <p class="format-hint">농도별 하위폴더 포함 (OMx500 자동 감지)</p>
-              <button class="btn-upload" id="btn-ai-control">폴더 선택</button>
-              <div class="file-info" id="ai-control-info"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Concentration checklist (shared) -->
-      <div class="ai-conc-checklist" id="ai-conc-checklist" style="display:none;">
-        <h4>감지된 농도</h4>
-        <div class="ai-conc-grid" id="ai-conc-grid"></div>
-      </div>
-    </div>
-
+<div class="app-layout">
+  <!-- Sidebar: wafer list + add button -->
+  <aside class="sidebar">
+    <h2>기판 목록</h2>
+    <div id="wafer-list"></div>
+    <input type="file" id="wafer-add-input" webkitdirectory multiple style="display:none;">
+    <button class="btn-add-wafer" id="btn-add-wafer">+ 기판 추가</button>
     <div class="error-msg" id="error-msg"></div>
-  </div>
+  </aside>
 
-  <!-- Tab Bar -->
-  <div class="tab-bar">
-    <button class="tab-btn active" data-tab="ai">AI 분석</button>
-    <button class="tab-btn" data-tab="raw">로우데이터</button>
-  </div>
+  <!-- Main content -->
+  <main class="main-content">
+    <h1>Raman G-Peak Diff Analyzer</h1>
+    <p class="subtitle">G-peak 차이 분포를 분석합니다</p>
 
-  <!-- AI Tab -->
-  <div class="tab-panel active" id="tab-ai">
-    <!-- AI 분석 시작 버튼 -->
-    <div class="card" style="padding: 16px 28px;">
-      <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>다중 농도 분석 시작</button>
+    <!-- Active wafer banner -->
+    <div id="active-wafer-banner" class="no-active">기판을 업로드하면 분석 대상이 표시됩니다.</div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="ai">AI 분석</button>
+      <button class="tab-btn" data-tab="raw">로우데이터</button>
     </div>
 
-    <!-- AI Analysis Results -->
-    <div id="ai-results">
-
-      <!-- Overview badges -->
-      <div class="card">
-        <div class="ai-overview-row" id="ai-overview-row"></div>
-        <div id="ai-summary-lines"></div>
-      </div>
-
-      <!-- Charts row: dose-response + heatmap -->
-      <div class="ai-charts-row">
-        <div class="ai-chart-card">
-          <div class="chart-title">농도-반응 곡선 (Dose-Response)</div>
-          <div id="ai-dose-response-rationale" style="margin-bottom:12px;"></div>
-          <div id="ai-dose-response-chart" style="width:100%;min-height:340px;"></div>
+    <!-- AI Tab -->
+    <div class="tab-panel active" id="tab-ai">
+      <!-- Concentration checklist (active wafer) -->
+      <div class="card" style="padding: 16px 28px;">
+        <div class="ai-conc-checklist" id="ai-conc-checklist" style="display:none;">
+          <h4>감지된 농도</h4>
+          <div class="ai-conc-grid" id="ai-conc-grid"></div>
         </div>
-        <div class="ai-chart-card">
-          <div class="chart-title">피처별 유의성 히트맵</div>
-          <div id="ai-heatmap-chart" style="width:100%;min-height:340px;"></div>
+        <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>다중 농도 분석 시작</button>
+      </div>
+
+      <!-- AI Analysis Results -->
+      <div id="ai-results">
+
+        <!-- Overview badges -->
+        <div class="card">
+          <div class="ai-overview-row" id="ai-overview-row"></div>
+          <div id="ai-summary-lines"></div>
+        </div>
+
+        <!-- Charts row: dose-response + heatmap -->
+        <div class="ai-charts-row">
+          <div class="ai-chart-card">
+            <div class="chart-title">농도-반응 곡선 (Dose-Response)</div>
+            <div id="ai-dose-response-rationale" style="margin-bottom:12px;"></div>
+            <div id="ai-dose-response-chart" style="width:100%;min-height:340px;"></div>
+          </div>
+          <div class="ai-chart-card">
+            <div class="chart-title">피처별 유의성 히트맵</div>
+            <div id="ai-heatmap-chart" style="width:100%;min-height:340px;"></div>
+          </div>
+        </div>
+
+        <!-- Concentration detail tabs -->
+        <div class="card">
+          <div class="ai-conc-tabs" id="ai-detail-tabs"></div>
+          <div id="ai-detail-content"></div>
+        </div>
+
+        <!-- Open summary -->
+        <div class="ai-summary-card" id="ai-summary-card">
+          <h3>분석 요약</h3>
+          <ul id="ai-summary-bullets"></ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Raw Tab -->
+    <div class="tab-panel" id="tab-raw">
+      <!-- CSV → Excel 통합 다운로드 -->
+      <div class="card raw-subcard">
+        <div class="card-title" style="font-weight:700; margin-bottom:12px;">CSV → Excel 통합</div>
+        <p style="color:#6B6B6B; font-size:14px; margin-bottom:16px;">
+          업로드한 모든 기판의 CSV 스펙트럼을 하나의 엑셀 파일로 병합하여 다운로드합니다.
+          시트명은 <code>W1_Fibril_농도</code>, <code>W2_Control_농도</code> 형식입니다.
+        </p>
+        <button class="btn-upload" id="btn-export-xlsx" disabled>Excel 다운로드</button>
+        <span id="export-status" style="margin-left:12px; color:#6B6B6B; font-size:13px;">사이드바에서 기판을 추가하면 활성화됩니다.</span>
+      </div>
+
+      <!-- PDF 양식 농도별 G-peak 차트 -->
+      <div class="card raw-subcard" id="raw-pdf-chart-card">
+        <div class="card-title" style="font-weight:700; margin-bottom:12px;">농도별 G-peak 분포 (PDF 양식)</div>
+        <p style="color:#6B6B6B; font-size:14px; margin-bottom:16px;">
+          국일그래핀 리포트 양식대로 각 기판별 농도별 Ref/Fibril G-peak 평균값과 95% CI를 표시합니다.
+        </p>
+
+        <div class="pdf-chart-controls" style="display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin-bottom:16px; padding:12px 16px; background:#FAF9F6; border-radius:8px;">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <label style="font-size:13px; font-weight:500; color:#6B6B6B;">G-peak 탐색 범위</label>
+            <input type="number" id="raw-gpeak-min" value="1540" min="1000" max="2000" step="10" style="width:70px; padding:4px 8px; border:1px solid #E8E5E0; border-radius:6px;">
+            <span>~</span>
+            <input type="number" id="raw-gpeak-max" value="1620" min="1000" max="2000" step="10" style="width:70px; padding:4px 8px; border:1px solid #E8E5E0; border-radius:6px;">
+            <span style="color:#6B6B6B; font-size:13px;">cm&#x207B;&#xB9;</span>
+          </div>
+          <label style="display:flex; gap:6px; align-items:center; font-size:13px; color:#1A1A1A; cursor:pointer;">
+            <input type="checkbox" id="raw-show-sorting" checked>
+            Sorting (I2D/IG &ge; 1) 병렬 표시
+          </label>
+        </div>
+
+        <div id="raw-pdf-chart-host"></div>
+      </div>
+
+      <!-- 농도별 세부 탐색 -->
+      <div class="card raw-subcard" id="raw-drill-card">
+        <div class="card-title" style="font-weight:700; margin-bottom:12px;">농도별 세부 탐색</div>
+        <p style="color:#6B6B6B; font-size:14px; margin-bottom:16px;">
+          활성 기판의 농도를 선택하면 해당 샘플의 Raw 스펙트럼과 G-peak 분포를 확인할 수 있습니다.
+        </p>
+
+        <div class="conc-selector" id="raw-conc-selector" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
+          <span style="color:#6B6B6B; font-size:13px;">업로드된 농도가 없습니다.</span>
+        </div>
+
+        <div id="raw-drilldown-content" style="display:none;">
+          <div id="raw-drilldown-stats" style="margin-bottom:16px; padding:12px 16px; background:#FAF9F6; border-radius:8px; font-size:13px;"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div id="raw-spectrum-plot" style="min-height:360px; background:#FFFFFF; border-radius:8px;"></div>
+            <div id="raw-gpeak-hist" style="min-height:360px; background:#FFFFFF; border-radius:8px;"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Concentration detail tabs -->
-      <div class="card">
-        <div class="ai-conc-tabs" id="ai-detail-tabs"></div>
-        <div id="ai-detail-content"></div>
-      </div>
-
-      <!-- Open summary -->
-      <div class="ai-summary-card" id="ai-summary-card">
-        <h3>분석 요약</h3>
-        <ul id="ai-summary-bullets"></ul>
-      </div>
-
     </div>
-  </div>
-
-  <!-- Raw Tab -->
-  <div class="tab-panel" id="tab-raw">
-    <!-- CSV → Excel 통합 다운로드 -->
-    <div class="card raw-subcard">
-      <div class="card-title" style="font-weight:700; margin-bottom:12px;">CSV → Excel 통합</div>
-      <p style="color:#6B6B6B; font-size:14px; margin-bottom:16px;">
-        상단에서 업로드한 모든 CSV 스펙트럼을 하나의 엑셀 파일로 병합하여 다운로드합니다.
-        각 {샘플종류}_{농도} 조합이 별도 시트로 저장됩니다.
-      </p>
-      <button class="btn-upload" id="btn-export-xlsx" disabled>Excel 다운로드</button>
-      <span id="export-status" style="margin-left:12px; color:#6B6B6B; font-size:13px;">상단에서 폴더를 업로드하면 활성화됩니다.</span>
-    </div>
-
-    <!-- PDF 양식 농도별 G-peak 차트 -->
-    <div class="card raw-subcard" id="raw-pdf-chart-card">
-      <div class="card-title" style="font-weight:700; margin-bottom:12px;">농도별 G-peak 분포 (PDF 양식)</div>
-      <p style="color:#6B6B6B; font-size:14px; margin-bottom:16px;">
-        국일그래핀 리포트 양식대로 농도별 Ref/Fibril G-peak 평균값과 95% CI를 표시합니다.
-      </p>
-
-      <div class="pdf-chart-controls" style="display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin-bottom:16px; padding:12px 16px; background:#FAF9F6; border-radius:8px;">
-        <div style="display:flex; gap:8px; align-items:center;">
-          <label style="font-size:13px; font-weight:500; color:#6B6B6B;">G-peak 탐색 범위</label>
-          <input type="number" id="raw-gpeak-min" value="1540" min="1000" max="2000" step="10" style="width:70px; padding:4px 8px; border:1px solid #E8E5E0; border-radius:6px;">
-          <span>~</span>
-          <input type="number" id="raw-gpeak-max" value="1620" min="1000" max="2000" step="10" style="width:70px; padding:4px 8px; border:1px solid #E8E5E0; border-radius:6px;">
-          <span style="color:#6B6B6B; font-size:13px;">cm&#x207B;&#xB9;</span>
-        </div>
-        <label style="display:flex; gap:6px; align-items:center; font-size:13px; color:#1A1A1A; cursor:pointer;">
-          <input type="checkbox" id="raw-show-sorting" checked>
-          Sorting (I2D/IG &ge; 1) 병렬 표시
-        </label>
-      </div>
-
-      <div id="raw-pdf-empty" style="padding:40px; text-align:center; color:#6B6B6B; font-size:14px;">
-        상단에서 폴더를 업로드하면 차트가 표시됩니다.
-      </div>
-      <div class="raw-chart-grid" id="raw-chart-grid" style="display:none;">
-        <div id="raw-chart-n100" style="min-height:400px;"></div>
-        <div id="raw-chart-sorted" style="min-height:400px;"></div>
-      </div>
-    </div>
-
-    <!-- 농도별 세부 탐색 -->
-    <div class="card raw-subcard" id="raw-drill-card">
-      <div class="card-title" style="font-weight:700; margin-bottom:12px;">농도별 세부 탐색</div>
-      <p style="color:#6B6B6B; font-size:14px; margin-bottom:16px;">
-        농도를 선택하면 해당 샘플의 Raw 스펙트럼과 G-peak 분포를 확인할 수 있습니다.
-      </p>
-
-      <div class="conc-selector" id="raw-conc-selector" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
-        <span style="color:#6B6B6B; font-size:13px;">업로드된 농도가 없습니다.</span>
-      </div>
-
-      <div id="raw-drilldown-content" style="display:none;">
-        <div id="raw-drilldown-stats" style="margin-bottom:16px; padding:12px 16px; background:#FAF9F6; border-radius:8px; font-size:13px;"></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-          <div id="raw-spectrum-plot" style="min-height:360px; background:#FFFFFF; border-radius:8px;"></div>
-          <div id="raw-gpeak-hist" style="min-height:360px; background:#FFFFFF; border-radius:8px;"></div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+  </main>
 </div>
 
 <script>
@@ -785,6 +824,15 @@ input[type="range"]::-moz-range-thumb {
 
   // DOM refs
   const errorMsg = document.getElementById('error-msg');
+
+  // ─── Multi-Wafer Data Model ───
+  var wafers = [];            // [{ id, name, fibril, control }]
+  var activeWaferId = null;
+  var _waferSeq = 0;
+
+  function getActiveWafer() {
+    return wafers.find(function(w){ return w.id === activeWaferId; }) || null;
+  }
 
   // ─── Tab Controller ───
   document.querySelectorAll('.tab-btn').forEach(function(btn) {
@@ -807,84 +855,6 @@ input[type="range"]::-moz-range-thumb {
       }
     });
   });
-
-  // ─── AI Upload Sub-Toggle (기판 통째로 / 따로) ───
-  document.getElementById('ai-upload-substrate').addEventListener('click', function() {
-    setAiUploadMode('substrate');
-  });
-  document.getElementById('ai-upload-separate').addEventListener('click', function() {
-    setAiUploadMode('separate');
-  });
-
-  function setAiUploadMode(mode) {
-    document.getElementById('ai-upload-substrate').classList.toggle('active', mode === 'substrate');
-    document.getElementById('ai-upload-separate').classList.toggle('active', mode === 'separate');
-    document.getElementById('ai-substrate-mode').style.display = mode === 'substrate' ? '' : 'none';
-    document.getElementById('ai-separate-mode').style.display = mode === 'separate' ? '' : 'none';
-  }
-
-  // ─── Substrate (기판) Folder Upload ───
-  var aiSubstrateInput = document.getElementById('ai-substrate-input');
-  var btnAiSubstrate = document.getElementById('btn-ai-substrate');
-  var aiSubstrateArea = document.getElementById('ai-substrate-upload-area');
-  var aiSubstrateInfo = document.getElementById('ai-substrate-info');
-
-  btnAiSubstrate.addEventListener('click', function(e) { e.stopPropagation(); aiSubstrateInput.click(); });
-  aiSubstrateArea.addEventListener('click', function() { aiSubstrateInput.click(); });
-  aiSubstrateArea.addEventListener('dragover', function(e) { e.preventDefault(); aiSubstrateArea.classList.add('drag-over'); });
-  aiSubstrateArea.addEventListener('dragleave', function() { aiSubstrateArea.classList.remove('drag-over'); });
-  aiSubstrateInput.addEventListener('change', function() {
-    if (aiSubstrateInput.files.length) handleSubstrateFolderUpload(aiSubstrateInput.files);
-  });
-
-  function handleSubstrateFolderUpload(files) {
-    hideError();
-    // Classify files into Fibril / Control by path
-    var fibrilFiles = [];
-    var controlFiles = [];
-
-    for (var i = 0; i < files.length; i++) {
-      var f = files[i];
-      if (!f.name.toLowerCase().endsWith('.csv')) continue;
-      var relPath = f.webkitRelativePath || f.name;
-      var lower = relPath.toLowerCase();
-
-      // Detect Fibril vs Control from path
-      var isFibril = lower.indexOf('fibril') !== -1 && lower.indexOf('control') === -1;
-      var isControl = lower.indexOf('control') !== -1;
-
-      if (!isFibril && !isControl) continue;
-      if (!isOMx500File(relPath)) continue;
-
-      if (isFibril) fibrilFiles.push(f);
-      else controlFiles.push(f);
-    }
-
-    if (fibrilFiles.length === 0 && controlFiles.length === 0) {
-      showError('Fibril/Control 폴더를 찾을 수 없습니다. 기판 폴더(예: Ⅰ. SiO2 wafer+FeCl3)를 선택해주세요.');
-      return;
-    }
-
-    // Create a FileList-like array and reuse existing handlers
-    var fakeAreaF = aiFibrilUploadArea;
-    var fakeAreaC = aiControlUploadArea;
-    var fakeInfoF = aiFibrilInfo;
-    var fakeInfoC = aiControlInfo;
-
-    // Process Fibril files
-    if (fibrilFiles.length > 0) {
-      handleAiFolderUpload(fibrilFiles, 'fibril', fakeAreaF, fakeInfoF);
-    }
-    // Process Control files
-    if (controlFiles.length > 0) {
-      handleAiFolderUpload(controlFiles, 'control', fakeAreaC, fakeInfoC);
-    }
-
-    aiSubstrateArea.classList.add('file-loaded');
-    var nFibrilConc = Object.keys(aiFibrilFolders).length;
-    var nControlConc = Object.keys(aiControlFolders).length;
-    aiSubstrateInfo.innerHTML = 'Fibril: ' + fibrilFiles.length + '개 CSV (' + nFibrilConc + '개 농도) | Control: ' + controlFiles.length + '개 CSV (' + nControlConc + '개 농도)';
-  }
 
   // ─── Raw Raman CSV Parsing ───
   function parseRamanCSV(text) {
@@ -953,38 +923,23 @@ input[type="range"]::-moz-range-thumb {
     '1\u00B5M':1e-6,'\u00B5M':1e-6
   };
 
-  // Folder data stores: { concLabel: { wavelengths, spectra } }
-  var aiFibrilFolders = {};
-  var aiControlFolders = {};
-
   // Peak ranges
   var D_RANGE  = [1300, 1400];
   var G_RANGE  = [1540, 1620];
   var D2_RANGE = [2600, 2800];
 
-  // ─── AI Upload Setup ───
-  var aiFibrilInput       = document.getElementById('ai-fibril-input');
-  var aiControlInput      = document.getElementById('ai-control-input');
-  var btnAiFibril         = document.getElementById('btn-ai-fibril');
-  var btnAiControl        = document.getElementById('btn-ai-control');
-  var aiFibrilUploadArea  = document.getElementById('ai-fibril-upload-area');
-  var aiControlUploadArea = document.getElementById('ai-control-upload-area');
-  var aiFibrilInfo        = document.getElementById('ai-fibril-info');
-  var aiControlInfo       = document.getElementById('ai-control-info');
+  // ─── Wafer Upload Setup ───
   var btnAiAnalyze        = document.getElementById('btn-ai-analyze');
+  var waferAddInput       = document.getElementById('wafer-add-input');
+  var btnAddWafer         = document.getElementById('btn-add-wafer');
 
-  function setupAiFolderUpload(area, input, btn, infoEl, which) {
-    btn.addEventListener('click', function(e) { e.stopPropagation(); input.click(); });
-    area.addEventListener('click', function() { input.click(); });
-    area.addEventListener('dragover', function(e) { e.preventDefault(); area.classList.add('drag-over'); });
-    area.addEventListener('dragleave', function() { area.classList.remove('drag-over'); });
-    input.addEventListener('change', function() {
-      if (input.files.length) handleAiFolderUpload(input.files, which, area, infoEl);
-    });
-  }
-
-  setupAiFolderUpload(aiFibrilUploadArea, aiFibrilInput, btnAiFibril, aiFibrilInfo, 'fibril');
-  setupAiFolderUpload(aiControlUploadArea, aiControlInput, btnAiControl, aiControlInfo, 'control');
+  btnAddWafer.addEventListener('click', function(){ waferAddInput.click(); });
+  waferAddInput.addEventListener('change', function(){
+    if (waferAddInput.files.length) {
+      createWaferFromFiles(waferAddInput.files);
+      waferAddInput.value = '';
+    }
+  });
 
   function detectConcentration(relativePath) {
     // Path pattern: rootFolder/concentration/OMx500/AUTO_xxx.csv
@@ -1029,74 +984,250 @@ input[type="range"]::-moz-range-thumb {
     return false;
   }
 
-  function handleAiFolderUpload(files, which, area, infoEl) {
-    hideError();
-    var concMap = {}; // concLabel -> [File]
-    var totalCSV = 0;
+  // ─── Wafer file ingestion ───
+  function ingestFilesIntoWafer(wafer, files) {
+    return new Promise(function(resolve, reject){
+      // Classify into fibril vs control buckets by path, then concentration
+      var buckets = { fibril: {}, control: {} }; // kind -> { conc: [File] }
+      var totalCSV = 0;
 
-    for (var i = 0; i < files.length; i++) {
-      var f = files[i];
-      if (!f.name.toLowerCase().endsWith('.csv')) continue;
-      var relPath = f.webkitRelativePath || f.name;
-      if (!isOMx500File(relPath)) continue;
-      var conc = detectConcentration(relPath);
-      if (!conc) continue;
-      if (!concMap[conc]) concMap[conc] = [];
-      concMap[conc].push(f);
-      totalCSV++;
-    }
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        if (!f.name.toLowerCase().endsWith('.csv')) continue;
+        var relPath = f.webkitRelativePath || f.name;
+        if (!isOMx500File(relPath)) continue;
+        var lower = relPath.toLowerCase();
+        var isFibril = lower.indexOf('fibril') !== -1 && lower.indexOf('control') === -1;
+        var isControl = lower.indexOf('control') !== -1;
+        if (!isFibril && !isControl) continue;
+        var conc = detectConcentration(relPath);
+        if (!conc) continue;
+        var kind = isFibril ? 'fibril' : 'control';
+        if (!buckets[kind][conc]) buckets[kind][conc] = [];
+        buckets[kind][conc].push(f);
+        totalCSV++;
+      }
 
-    var concLabels = Object.keys(concMap);
-    if (concLabels.length === 0) {
-      showError('OMx500 폴더 내 농도별 CSV 파일을 찾을 수 없습니다. 폴더 구조를 확인하세요.');
-      return;
-    }
+      if (totalCSV === 0) {
+        reject(new Error('OMx500 폴더 내 Fibril/Control 농도별 CSV 파일을 찾을 수 없습니다. 폴더 구조를 확인하세요.'));
+        return;
+      }
 
-    area.classList.add('file-loaded');
-    infoEl.innerHTML = '<span class="filename">' + concLabels.length + '개 농도</span> &mdash; ' + totalCSV + '개 CSV 파일';
+      var pending = totalCSV;
+      var done = false;
+      function finish() {
+        if (done) return;
+        done = true;
+        resolve();
+      }
 
-    // Read and parse all files per concentration
-    var store = which === 'fibril' ? aiFibrilFolders : aiControlFolders;
-    // Clear previous
-    if (which === 'fibril') { aiFibrilFolders = {}; store = aiFibrilFolders; }
-    else { aiControlFolders = {}; store = aiControlFolders; }
-
-    var pending = totalCSV;
-    concLabels.forEach(function(conc) {
-      store[conc] = { wavelengths: null, spectra: [], sources: [] };
-      concMap[conc].forEach(function(file) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            var parsed = parseRamanCSV(e.target.result);
-            if (parsed.wavelengths && parsed.wavelengths.length > 0) {
-              if (!store[conc].wavelengths) {
-                store[conc].wavelengths = parsed.wavelengths;
-              }
-              var srcName = file.webkitRelativePath || file.name;
-              parsed.spectra.forEach(function(sp) {
-                store[conc].spectra.push(sp);
-                store[conc].sources.push(srcName);
-              });
-            }
-          } catch(err) { /* skip bad files */ }
-          pending--;
-          if (pending === 0) {
-            onUploadStateChanged();
-          }
-        };
-        reader.onerror = function() {
-          pending--;
-          if (pending === 0) {
-            onUploadStateChanged();
-          }
-        };
-        reader.readAsText(file, 'utf-8');
+      ['fibril','control'].forEach(function(kind){
+        var store = wafer[kind];
+        Object.keys(buckets[kind]).forEach(function(conc){
+          if (!store[conc]) store[conc] = { wavelengths: null, spectra: [], sources: [] };
+          buckets[kind][conc].forEach(function(file){
+            var reader = new FileReader();
+            reader.onload = function(e){
+              try {
+                var parsed = parseRamanCSV(e.target.result);
+                if (parsed.wavelengths && parsed.wavelengths.length > 0) {
+                  if (!store[conc].wavelengths) store[conc].wavelengths = parsed.wavelengths;
+                  var srcName = file.webkitRelativePath || file.name;
+                  parsed.spectra.forEach(function(sp){
+                    store[conc].spectra.push(sp);
+                    store[conc].sources.push(srcName);
+                  });
+                }
+              } catch(err) { /* skip bad files */ }
+              if (--pending === 0) finish();
+            };
+            reader.onerror = function(){
+              if (--pending === 0) finish();
+            };
+            reader.readAsText(file, 'utf-8');
+          });
+        });
       });
     });
   }
 
-  function onUploadStateChanged(){
+  function extractWaferNameFromFiles(files) {
+    for (var i = 0; i < files.length; i++) {
+      var rel = files[i].webkitRelativePath || '';
+      if (rel) {
+        var top = rel.split('/')[0];
+        if (top) return top;
+      }
+    }
+    return 'Wafer ' + (wafers.length + 1);
+  }
+
+  function createWaferFromFiles(files) {
+    hideError();
+    var wafer = {
+      id: 'wafer_' + Date.now() + '_' + (++_waferSeq),
+      name: extractWaferNameFromFiles(files),
+      fibril: {},
+      control: {}
+    };
+    ingestFilesIntoWafer(wafer, files).then(function(){
+      wafers.push(wafer);
+      activeWaferId = wafer.id;
+      onWafersChanged();
+    }).catch(function(err){
+      showError(err && err.message ? err.message : '업로드 처리 중 오류가 발생했습니다.');
+    });
+  }
+
+  function setActiveWafer(id) {
+    if (activeWaferId === id) return;
+    activeWaferId = id;
+    // Clear AI results (stale)
+    var aiRes = document.getElementById('ai-results');
+    if (aiRes) aiRes.classList.remove('visible');
+    // Reset drill conc if not present in new wafer
+    var w = getActiveWafer();
+    if (currentDrillConc && w) {
+      var hasF = w.fibril[currentDrillConc] && w.fibril[currentDrillConc].spectra.length > 0;
+      var hasC = w.control[currentDrillConc] && w.control[currentDrillConc].spectra.length > 0;
+      if (!hasF && !hasC) currentDrillConc = null;
+    } else if (!w) {
+      currentDrillConc = null;
+    }
+    onWafersChanged();
+  }
+
+  function deleteWafer(id) {
+    var w = wafers.find(function(x){ return x.id === id; });
+    if (!w) return;
+    if (!confirm('"' + w.name + '" 기판을 삭제하시겠습니까?')) return;
+    var idx = wafers.findIndex(function(x){ return x.id === id; });
+    if (idx < 0) return;
+    wafers.splice(idx, 1);
+    if (activeWaferId === id) {
+      activeWaferId = wafers[0] ? wafers[0].id : null;
+      currentDrillConc = null;
+      var aiRes = document.getElementById('ai-results');
+      if (aiRes) aiRes.classList.remove('visible');
+    }
+    onWafersChanged();
+  }
+
+  function renameWafer(id, name) {
+    var w = wafers.find(function(x){ return x.id === id; });
+    if (!w) return false;
+    var trimmed = (name || '').trim();
+    if (!trimmed) return false;
+    w.name = trimmed;
+    return true;
+  }
+
+  function countWaferSpectra(store) {
+    var totalSpectra = 0;
+    var concSet = {};
+    Object.keys(store).forEach(function(c){
+      if (store[c] && store[c].spectra && store[c].spectra.length) {
+        totalSpectra += store[c].spectra.length;
+        concSet[c] = true;
+      }
+    });
+    return { spectra: totalSpectra, concs: Object.keys(concSet).length };
+  }
+
+  // ─── Sidebar rendering ───
+  function renderSidebar() {
+    var listEl = document.getElementById('wafer-list');
+    if (!listEl) return;
+    if (wafers.length === 0) {
+      listEl.innerHTML = '<div class="sidebar-empty">아직 추가된 기판이 없습니다.<br>아래 버튼으로 기판 폴더를 추가하세요.</div>';
+      return;
+    }
+    var html = '';
+    wafers.forEach(function(w){
+      var fStats = countWaferSpectra(w.fibril);
+      var cStats = countWaferSpectra(w.control);
+      var isActive = w.id === activeWaferId;
+      html += '<div class="wafer-card' + (isActive ? ' active' : '') + '" data-wafer-id="' + w.id + '">' +
+        '<label class="wafer-header">' +
+          '<input type="radio" name="active-wafer" value="' + w.id + '"' + (isActive ? ' checked' : '') + '>' +
+          '<span class="wafer-name" contenteditable="true" spellcheck="false" data-wafer-id="' + w.id + '" data-original="' + escapeAttr(w.name) + '">' + escapeHtml(w.name) + '</span>' +
+        '</label>' +
+        '<div class="wafer-stats">' +
+          '<span>Fibril: ' + fStats.concs + '개 농도, ' + fStats.spectra + '개</span>' +
+          '<span>Control: ' + cStats.concs + '개 농도, ' + cStats.spectra + '개</span>' +
+        '</div>' +
+        '<button class="btn-remove-wafer" data-wafer-id="' + w.id + '">삭제</button>' +
+        '</div>';
+    });
+    listEl.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'})[c];
+    });
+  }
+  function escapeAttr(s) {
+    return escapeHtml(s);
+  }
+
+  function renderActiveWaferBanner() {
+    var el = document.getElementById('active-wafer-banner');
+    if (!el) return;
+    var w = getActiveWafer();
+    if (!w) {
+      el.classList.add('no-active');
+      el.textContent = '기판을 업로드하면 분석 대상이 표시됩니다.';
+    } else {
+      el.classList.remove('no-active');
+      el.innerHTML = '현재 분석 대상: <strong>' + escapeHtml(w.name) + '</strong>';
+    }
+  }
+
+  // Sidebar event delegation
+  (function setupSidebarDelegation(){
+    var listEl = document.getElementById('wafer-list');
+    if (!listEl) return;
+    listEl.addEventListener('change', function(e){
+      if (e.target && e.target.matches('input[type="radio"][name="active-wafer"]')) {
+        setActiveWafer(e.target.value);
+      }
+    });
+    listEl.addEventListener('click', function(e){
+      var btn = e.target.closest && e.target.closest('.btn-remove-wafer');
+      if (btn) {
+        e.preventDefault();
+        deleteWafer(btn.getAttribute('data-wafer-id'));
+      }
+    });
+    listEl.addEventListener('blur', function(e){
+      if (e.target && e.target.classList && e.target.classList.contains('wafer-name')) {
+        var id = e.target.getAttribute('data-wafer-id');
+        var orig = e.target.getAttribute('data-original') || '';
+        var newName = (e.target.textContent || '').trim();
+        if (!newName) {
+          e.target.textContent = orig;
+          return;
+        }
+        if (renameWafer(id, newName)) {
+          e.target.setAttribute('data-original', newName);
+          renderActiveWaferBanner();
+        }
+      }
+    }, true);
+    listEl.addEventListener('keydown', function(e){
+      if (e.target && e.target.classList && e.target.classList.contains('wafer-name')) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          e.target.blur();
+        }
+      }
+    });
+  })();
+
+  function onWafersChanged(){
+    renderSidebar();
+    renderActiveWaferBanner();
     updateConcChecklist();
     updateAiAnalyzeButton();
     updateRawExportButton();
@@ -1107,21 +1238,28 @@ input[type="range"]::-moz-range-thumb {
   function updateConcChecklist() {
     var checklist = document.getElementById('ai-conc-checklist');
     var grid = document.getElementById('ai-conc-grid');
+    if (!checklist || !grid) return;
+    var w = getActiveWafer();
+    if (!w) {
+      grid.innerHTML = '';
+      checklist.style.display = 'none';
+      return;
+    }
     var html = '';
     var anyFound = false;
     KNOWN_CONCS_DISPLAY.forEach(function(conc) {
-      var hasFibril = aiFibrilFolders[conc] && aiFibrilFolders[conc].spectra.length > 0;
-      var hasControl = aiControlFolders[conc] && aiControlFolders[conc].spectra.length > 0;
+      var hasFibril = w.fibril[conc] && w.fibril[conc].spectra.length > 0;
+      var hasControl = w.control[conc] && w.control[conc].spectra.length > 0;
       var both = hasFibril && hasControl;
       if (hasFibril || hasControl) anyFound = true;
       var cls = both ? 'found' : 'missing';
       var detail = '';
       if (both) {
-        detail = ' (' + aiFibrilFolders[conc].spectra.length + '/' + aiControlFolders[conc].spectra.length + ')';
+        detail = ' (' + w.fibril[conc].spectra.length + '/' + w.control[conc].spectra.length + ')';
       } else if (hasFibril) {
-        detail = ' (F:' + aiFibrilFolders[conc].spectra.length + ')';
+        detail = ' (F:' + w.fibril[conc].spectra.length + ')';
       } else if (hasControl) {
-        detail = ' (C:' + aiControlFolders[conc].spectra.length + ')';
+        detail = ' (C:' + w.control[conc].spectra.length + ')';
       }
       html += '<span class="ai-conc-chip ' + cls + '">' + conc + detail + '</span>';
     });
@@ -1130,11 +1268,12 @@ input[type="range"]::-moz-range-thumb {
   }
 
   function updateAiAnalyzeButton() {
-    // Need at least one matching concentration with both Fibril and Control
+    var w = getActiveWafer();
+    if (!w) { btnAiAnalyze.disabled = true; return; }
     var anyPair = false;
     KNOWN_CONCS_DISPLAY.forEach(function(conc) {
-      if (aiFibrilFolders[conc] && aiFibrilFolders[conc].spectra.length > 0 &&
-          aiControlFolders[conc] && aiControlFolders[conc].spectra.length > 0) {
+      if (w.fibril[conc] && w.fibril[conc].spectra.length > 0 &&
+          w.control[conc] && w.control[conc].spectra.length > 0) {
         anyPair = true;
       }
     });
@@ -1342,6 +1481,11 @@ input[type="range"]::-moz-range-thumb {
   // ─── Multi-Concentration Analysis Runner ───
   function runAiMultiAnalysis() {
     hideError();
+    var activeW = getActiveWafer();
+    if (!activeW) {
+      showError('활성 기판이 없습니다. 사이드바에서 기판을 선택하세요.');
+      return;
+    }
 
     var featureKeys = ['g_position', 'g_fwhm', 'd_g_ratio', 'i2d_ig_ratio'];
     var featureLabels = {
@@ -1355,8 +1499,8 @@ input[type="range"]::-moz-range-thumb {
     var concResults = []; // array of { conc, concDisplay, quality, featureResults, ... }
 
     KNOWN_CONCS_DISPLAY.forEach(function(conc) {
-      var fData = aiFibrilFolders[conc];
-      var cData = aiControlFolders[conc];
+      var fData = activeW.fibril[conc];
+      var cData = activeW.control[conc];
       if (!fData || !cData || fData.spectra.length === 0 || cData.spectra.length === 0 ||
           !fData.wavelengths || !cData.wavelengths) return;
 
@@ -1456,7 +1600,6 @@ input[type="range"]::-moz-range-thumb {
     renderOpenSummary(concResults, crossConc, featureLabels, bestFeatureKey, detectionLimit);
 
     document.getElementById('ai-results').classList.add('visible');
-    chartPlaceholder.style.display = 'none';
   }
 
   // ─── Render: Overview Badges ───
@@ -1817,68 +1960,77 @@ input[type="range"]::-moz-range-thumb {
     }).join('');
   }
 
-  // ─── CSV → Excel 통합 다운로드 ───
+  // ─── CSV → Excel 통합 다운로드 (all wafers) ───
   function updateRawExportButton(){
     var btn = document.getElementById('btn-export-xlsx');
     var status = document.getElementById('export-status');
     if (!btn || !status) return;
     var total = 0;
-    if (typeof KNOWN_CONCS_DISPLAY !== 'undefined') {
-      KNOWN_CONCS_DISPLAY.forEach(function(c){
-        if (aiFibrilFolders[c] && aiFibrilFolders[c].spectra) total += aiFibrilFolders[c].spectra.length;
-        if (aiControlFolders[c] && aiControlFolders[c].spectra) total += aiControlFolders[c].spectra.length;
+    wafers.forEach(function(w){
+      ['fibril','control'].forEach(function(kind){
+        KNOWN_CONCS_DISPLAY.forEach(function(c){
+          if (w[kind][c] && w[kind][c].spectra) total += w[kind][c].spectra.length;
+        });
       });
-    }
+    });
     btn.disabled = total === 0;
-    status.textContent = total > 0 ? (total + '개 스펙트럼 준비됨') : '상단에서 폴더를 업로드하면 활성화됩니다.';
+    if (wafers.length === 0) {
+      status.textContent = '사이드바에서 기판을 추가하면 활성화됩니다.';
+    } else {
+      status.textContent = wafers.length + '개 기판, ' + total + '개 스펙트럼 준비됨';
+    }
   }
 
   function exportAllToXlsx(){
+    if (wafers.length === 0) {
+      showError('다운로드할 데이터가 없습니다.');
+      return;
+    }
     var wb = XLSX.utils.book_new();
-    var summaryRows = [['SampleType','Concentration','N spectra','Mean G-peak (cm⁻¹)','Std','Sheet name']];
+    var summaryRows = [['Wafer','SampleType','Concentration','N spectra','Mean G-peak (cm⁻¹)','Std','Sheet name']];
     var sheetCount = 0;
 
-    ['fibril','control'].forEach(function(kind){
-      var store = kind === 'fibril' ? aiFibrilFolders : aiControlFolders;
-      var label = kind === 'fibril' ? 'Fibril' : 'Control';
-      KNOWN_CONCS_DISPLAY.forEach(function(conc){
-        var d = store[conc];
-        if (!d || !d.spectra || !d.spectra.length) return;
+    wafers.forEach(function(wafer, wIdx){
+      var prefix = 'W' + (wIdx + 1);
+      ['fibril','control'].forEach(function(kind){
+        var store = wafer[kind];
+        var label = kind === 'fibril' ? 'Fibril' : 'Control';
+        KNOWN_CONCS_DISPLAY.forEach(function(conc){
+          var d = store[conc];
+          if (!d || !d.spectra || !d.spectra.length) return;
 
-        // Build sheet rows
-        var aoa = [
-          ['# Sample', label, '# Concentration', conc, '# N spectra', d.spectra.length],
-          []
-        ];
-        var header = ['Wavelength (cm⁻¹)'];
-        for (var i = 0; i < d.spectra.length; i++){
-          header.push('Intensity_' + String(i+1).padStart(3,'0'));
-        }
-        aoa.push(header);
-        for (var w = 0; w < d.wavelengths.length; w++){
-          var row = [d.wavelengths[w]];
-          for (var s = 0; s < d.spectra.length; s++) row.push(d.spectra[s][w]);
-          aoa.push(row);
-        }
+          var aoa = [
+            ['# Wafer', wafer.name, '# Sample', label, '# Concentration', conc, '# N spectra', d.spectra.length],
+            []
+          ];
+          var header = ['Wavelength (cm⁻¹)'];
+          for (var i = 0; i < d.spectra.length; i++){
+            header.push('Intensity_' + String(i+1).padStart(3,'0'));
+          }
+          aoa.push(header);
+          for (var wi = 0; wi < d.wavelengths.length; wi++){
+            var row = [d.wavelengths[wi]];
+            for (var s = 0; s < d.spectra.length; s++) row.push(d.spectra[s][wi]);
+            aoa.push(row);
+          }
 
-        // Sheet name (31 char limit, safe chars)
-        var sheetName = (label + '_' + conc).replace(/[^A-Za-z0-9_]/g,'_').slice(0,31);
-        var ws = XLSX.utils.aoa_to_sheet(aoa);
-        XLSX.utils.book_append_sheet(wb, ws, sheetName);
-        sheetCount++;
+          var sheetName = (prefix + '_' + label + '_' + conc).replace(/[^A-Za-z0-9_]/g,'_').slice(0,31);
+          var ws = XLSX.utils.aoa_to_sheet(aoa);
+          XLSX.utils.book_append_sheet(wb, ws, sheetName);
+          sheetCount++;
 
-        // Summary row
-        var peaks = [];
-        for (var si = 0; si < d.spectra.length; si++){
-          var peak = findGPeakPosition(d.wavelengths, d.spectra[si], 1540, 1620);
-          if (!isNaN(peak)) peaks.push(peak);
-        }
-        summaryRows.push([
-          label, conc, d.spectra.length,
-          peaks.length ? mean(peaks).toFixed(3) : '—',
-          peaks.length ? stdDev(peaks).toFixed(3) : '—',
-          sheetName
-        ]);
+          var peaks = [];
+          for (var si = 0; si < d.spectra.length; si++){
+            var peak = findGPeakPosition(d.wavelengths, d.spectra[si], 1540, 1620);
+            if (!isNaN(peak)) peaks.push(peak);
+          }
+          summaryRows.push([
+            wafer.name, label, conc, d.spectra.length,
+            peaks.length ? mean(peaks).toFixed(3) : '—',
+            peaks.length ? stdDev(peaks).toFixed(3) : '—',
+            sheetName
+          ]);
+        });
       });
     });
 
@@ -1898,8 +2050,12 @@ input[type="range"]::-moz-range-thumb {
   if (_btnExportXlsx) _btnExportXlsx.addEventListener('click', exportAllToXlsx);
   updateRawExportButton();
 
-  // ─── PDF-style Chart ────────────────────────────────────────
+  // ─── PDF-style Chart (per-wafer stack) ────────────────────
   function renderPdfStyleChart(){
+    var host = document.getElementById('raw-pdf-chart-host');
+    if (!host) return;
+    host.innerHTML = '';
+
     var minEl = document.getElementById('raw-gpeak-min');
     var maxEl = document.getElementById('raw-gpeak-max');
     if (!minEl || !maxEl) return;
@@ -1910,31 +2066,19 @@ input[type="range"]::-moz-range-thumb {
     var showSortedEl = document.getElementById('raw-show-sorting');
     var showSorted = showSortedEl ? showSortedEl.checked : true;
 
-    // Check if any data
-    var totalSpectra = 0;
-    KNOWN_CONCS_DISPLAY.forEach(function(c){
-      if (aiFibrilFolders[c] && aiFibrilFolders[c].spectra) totalSpectra += aiFibrilFolders[c].spectra.length;
-      if (aiControlFolders[c] && aiControlFolders[c].spectra) totalSpectra += aiControlFolders[c].spectra.length;
-    });
-    var emptyEl = document.getElementById('raw-pdf-empty');
-    var gridEl = document.getElementById('raw-chart-grid');
-    if (!emptyEl || !gridEl) return;
-    if (totalSpectra === 0) {
-      emptyEl.style.display = '';
-      gridEl.style.display = 'none';
+    if (wafers.length === 0) {
+      host.innerHTML = '<div style="padding:40px; text-align:center; color:#6B6B6B; font-size:14px;">사이드바에서 기판을 추가하면 차트가 표시됩니다.</div>';
       return;
     }
-    emptyEl.style.display = 'none';
-    gridEl.style.display = '';
 
     // Highest → lowest concentration order
     var concHighToLow = KNOWN_CONCS_DISPLAY.slice().reverse();
 
-    function buildSeries(filterFn){
+    function buildSeries(wafer, filterFn){
       var xs=[], means=[], errs=[], colors=[];
       concHighToLow.forEach(function(conc){
-        [['Ref', aiControlFolders[conc], '#222'],
-         ['Fibril', aiFibrilFolders[conc], '#e53935']].forEach(function(pair){
+        [['Ref', wafer.control[conc], '#222'],
+         ['Fibril', wafer.fibril[conc], '#e53935']].forEach(function(pair){
           var name = pair[0];
           var d = pair[1];
           var color = pair[2];
@@ -1959,24 +2103,47 @@ input[type="range"]::-moz-range-thumb {
       return { xs:xs, means:means, errs:errs, colors:colors };
     }
 
-    // N=전체 (all spectra)
-    var all = buildSeries(function(d){ return d.spectra; });
-    plotPdfStyle('raw-chart-n100', 'N=전체', all);
+    wafers.forEach(function(wafer){
+      var section = document.createElement('div');
+      section.className = 'wafer-chart-section';
+      var title = document.createElement('div');
+      title.className = 'wafer-chart-title';
+      title.textContent = wafer.name;
+      section.appendChild(title);
 
-    // Sorting variant
-    var sortedDiv = document.getElementById('raw-chart-sorted');
-    if (showSorted) {
-      sortedDiv.style.display = '';
-      var sorted = buildSeries(function(d){
-        var result = filterByQuality(d.wavelengths, d.spectra, 1.0);
-        return result.filtered;
-      });
-      plotPdfStyle('raw-chart-sorted', 'Sorting (I2D/IG ≥ 1)', sorted);
-      gridEl.style.gridTemplateColumns = '1fr 1fr';
-    } else {
-      sortedDiv.style.display = 'none';
-      gridEl.style.gridTemplateColumns = '1fr';
-    }
+      var grid = document.createElement('div');
+      grid.className = 'raw-chart-grid';
+      grid.style.gridTemplateColumns = showSorted ? '1fr 1fr' : '1fr';
+
+      var idSafe = wafer.id.replace(/[^A-Za-z0-9_]/g, '_');
+      var n100Id = 'raw-chart-n100-' + idSafe;
+      var sortedId = 'raw-chart-sorted-' + idSafe;
+
+      var n100Div = document.createElement('div');
+      n100Div.id = n100Id;
+      n100Div.style.minHeight = '400px';
+      grid.appendChild(n100Div);
+
+      var sortedDiv = document.createElement('div');
+      sortedDiv.id = sortedId;
+      sortedDiv.style.minHeight = '400px';
+      if (!showSorted) sortedDiv.style.display = 'none';
+      grid.appendChild(sortedDiv);
+
+      section.appendChild(grid);
+      host.appendChild(section);
+
+      var all = buildSeries(wafer, function(d){ return d.spectra; });
+      plotPdfStyle(n100Id, 'N=전체', all);
+
+      if (showSorted) {
+        var sorted = buildSeries(wafer, function(d){
+          var result = filterByQuality(d.wavelengths, d.spectra, 1.0);
+          return result.filtered;
+        });
+        plotPdfStyle(sortedId, 'Sorting (I2D/IG ≥ 1)', sorted);
+      }
+    });
   }
 
   function plotPdfStyle(divId, title, s){
@@ -2053,30 +2220,34 @@ input[type="range"]::-moz-range-thumb {
   function updateRawConcSelector(){
     var el = document.getElementById('raw-conc-selector');
     if (!el) return;
+    var w = getActiveWafer();
     var chips = [];
-    KNOWN_CONCS_DISPLAY.forEach(function(conc){
-      var f = aiFibrilFolders[conc];
-      var c = aiControlFolders[conc];
-      var hasF = f && f.spectra && f.spectra.length;
-      var hasC = c && c.spectra && c.spectra.length;
-      if (!hasF && !hasC) return;
+    if (w) {
+      KNOWN_CONCS_DISPLAY.forEach(function(conc){
+        var f = w.fibril[conc];
+        var c = w.control[conc];
+        var hasF = f && f.spectra && f.spectra.length;
+        var hasC = c && c.spectra && c.spectra.length;
+        if (!hasF && !hasC) return;
 
-      var counts = [];
-      if (hasF) counts.push('F=' + f.spectra.length);
-      if (hasC) counts.push('C=' + c.spectra.length);
+        var counts = [];
+        if (hasF) counts.push('F=' + f.spectra.length);
+        if (hasC) counts.push('C=' + c.spectra.length);
 
-      var active = conc === currentDrillConc ? ' active' : '';
-      chips.push(
-        '<button class="conc-chip' + active + '" data-conc="' + conc + '">' +
-          conc +
-          '<span class="chip-badge">(' + counts.join(', ') + ')</span>' +
-        '</button>'
-      );
-    });
+        var active = conc === currentDrillConc ? ' active' : '';
+        chips.push(
+          '<button class="conc-chip' + active + '" data-conc="' + conc + '">' +
+            conc +
+            '<span class="chip-badge">(' + counts.join(', ') + ')</span>' +
+          '</button>'
+        );
+      });
+    }
 
     if (chips.length === 0) {
-      el.innerHTML = '<span style="color:#6B6B6B; font-size:13px;">업로드된 농도가 없습니다.</span>';
-      document.getElementById('raw-drilldown-content').style.display = 'none';
+      el.innerHTML = '<span style="color:#6B6B6B; font-size:13px;">' + (w ? '업로드된 농도가 없습니다.' : '활성 기판이 없습니다.') + '</span>';
+      var dc = document.getElementById('raw-drilldown-content');
+      if (dc) dc.style.display = 'none';
       currentDrillConc = null;
     } else {
       el.innerHTML = chips.join('');
@@ -2087,7 +2258,8 @@ input[type="range"]::-moz-range-thumb {
       });
       if (currentDrillConc && !chips.some(function(c){ return c.indexOf('data-conc="' + currentDrillConc + '"') > -1; })) {
         currentDrillConc = null;
-        document.getElementById('raw-drilldown-content').style.display = 'none';
+        var dc2 = document.getElementById('raw-drilldown-content');
+        if (dc2) dc2.style.display = 'none';
       }
     }
   }
@@ -2104,12 +2276,15 @@ input[type="range"]::-moz-range-thumb {
 
   function renderDrillStats(conc){
     var statsEl = document.getElementById('raw-drilldown-stats');
-    var f = aiFibrilFolders[conc];
-    var c = aiControlFolders[conc];
+    if (!statsEl) return;
+    var w = getActiveWafer();
+    if (!w) { statsEl.innerHTML = ''; return; }
+    var f = w.fibril[conc];
+    var c = w.control[conc];
     var minWl = parseFloat(document.getElementById('raw-gpeak-min').value) || 1540;
     var maxWl = parseFloat(document.getElementById('raw-gpeak-max').value) || 1620;
 
-    var parts = ['<strong>' + conc + '</strong>'];
+    var parts = ['<strong>' + escapeHtml(w.name) + ' &middot; ' + conc + '</strong>'];
 
     ['fibril','control'].forEach(function(kind){
       var d = kind === 'fibril' ? f : c;
@@ -2138,9 +2313,15 @@ input[type="range"]::-moz-range-thumb {
   function renderDrillSpectrum(conc){
     var traces = [];
     var MAX_LINES = 30;
+    var w = getActiveWafer();
+    if (!w) {
+      var sp = document.getElementById('raw-spectrum-plot');
+      if (sp) sp.innerHTML = '<div style="padding:40px; text-align:center; color:#6B6B6B;">활성 기판이 없습니다</div>';
+      return;
+    }
 
     ['control','fibril'].forEach(function(kind){
-      var d = kind === 'fibril' ? aiFibrilFolders[conc] : aiControlFolders[conc];
+      var d = kind === 'fibril' ? w.fibril[conc] : w.control[conc];
       if (!d || !d.spectra || !d.spectra.length) return;
 
       var label = kind === 'fibril' ? 'Fibril' : 'Control';
@@ -2214,9 +2395,15 @@ input[type="range"]::-moz-range-thumb {
     var maxWl = parseFloat(document.getElementById('raw-gpeak-max').value) || 1620;
 
     var traces = [];
+    var w = getActiveWafer();
+    if (!w) {
+      var gh = document.getElementById('raw-gpeak-hist');
+      if (gh) gh.innerHTML = '<div style="padding:40px; text-align:center; color:#6B6B6B;">활성 기판이 없습니다</div>';
+      return;
+    }
 
     ['control','fibril'].forEach(function(kind){
-      var d = kind === 'fibril' ? aiFibrilFolders[conc] : aiControlFolders[conc];
+      var d = kind === 'fibril' ? w.fibril[conc] : w.control[conc];
       if (!d || !d.spectra || !d.spectra.length) return;
       var label = kind === 'fibril' ? 'Fibril' : 'Control';
       var color = kind === 'fibril' ? '#e53935' : '#222';
@@ -2279,7 +2466,8 @@ input[type="range"]::-moz-range-thumb {
   if (_rMaxEl) _rMaxEl.addEventListener('input', schedulePdfRender);
   if (_rSortEl) _rSortEl.addEventListener('change', renderPdfStyleChart);
 
-  updateRawConcSelector();
+  // Initial render (empty state)
+  onWafersChanged();
 
 })();
 </script>
