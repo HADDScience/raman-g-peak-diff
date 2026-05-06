@@ -2289,7 +2289,7 @@ input[type="range"]::-moz-range-thumb {
     var el = document.getElementById('raw-conc-selector');
     if (!el) return;
     var w = getActiveWafer();
-    var chips = [];
+    var concItems = [];
     if (w) {
       KNOWN_CONCS_DISPLAY.forEach(function(conc){
         var f = w.fibril[conc];
@@ -2302,32 +2302,38 @@ input[type="range"]::-moz-range-thumb {
         if (hasF) counts.push('F=' + f.spectra.length);
         if (hasC) counts.push('C=' + c.spectra.length);
 
-        var active = conc === currentDrillConc ? ' active' : '';
-        chips.push(
-          '<button class="conc-chip' + active + '" data-conc="' + conc + '">' +
-            conc +
-            '<span class="chip-badge">(' + counts.join(', ') + ')</span>' +
-          '</button>'
-        );
+        concItems.push({ conc: conc, counts: counts });
       });
     }
 
-    if (chips.length === 0) {
+    if (concItems.length === 0) {
       el.innerHTML = '<span style="color:#6B6B6B; font-size:13px;">' + (w ? '업로드된 농도가 없습니다.' : '활성 기판이 없습니다.') + '</span>';
       var dc = document.getElementById('raw-drilldown-content');
       if (dc) dc.style.display = 'none';
       currentDrillConc = null;
     } else {
+      if (!currentDrillConc || !concItems.some(function(item){ return item.conc === currentDrillConc; })) {
+        currentDrillConc = concItems[0].conc;
+      }
+      var chips = concItems.map(function(item) {
+        var active = item.conc === currentDrillConc ? ' active' : '';
+        return '<button class="conc-chip' + active + '" data-conc="' + item.conc + '">' +
+          item.conc +
+          '<span class="chip-badge">(' + item.counts.join(', ') + ')</span>' +
+        '</button>';
+      });
       el.innerHTML = chips.join('');
       el.querySelectorAll('.conc-chip').forEach(function(chip){
         chip.addEventListener('click', function(){
           selectDrillConc(chip.dataset.conc);
         });
       });
-      if (currentDrillConc && !chips.some(function(c){ return c.indexOf('data-conc="' + currentDrillConc + '"') > -1; })) {
-        currentDrillConc = null;
-        var dc2 = document.getElementById('raw-drilldown-content');
-        if (dc2) dc2.style.display = 'none';
+      var dc2 = document.getElementById('raw-drilldown-content');
+      if (dc2 && currentDrillConc) {
+        dc2.style.display = '';
+        renderDrillStats(currentDrillConc);
+        renderDrillSpectrum(currentDrillConc);
+        renderDrillGPeakHist(currentDrillConc);
       }
     }
   }
@@ -2410,11 +2416,11 @@ input[type="range"]::-moz-range-thumb {
       }
 
       var meanSp = [];
-      for (var w = 0; w < d.wavelengths.length; w++){
+      for (var wi = 0; wi < d.wavelengths.length; wi++){
         var sum = 0;
         var cnt = 0;
         for (var s = 0; s < d.spectra.length; s++){
-          if (!isNaN(d.spectra[s][w])) { sum += d.spectra[s][w]; cnt++; }
+          if (!isNaN(d.spectra[s][wi])) { sum += d.spectra[s][wi]; cnt++; }
         }
         meanSp.push(cnt > 0 ? sum / cnt : 0);
       }
