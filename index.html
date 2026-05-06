@@ -814,8 +814,8 @@ input[type="range"]::-moz-range-thumb {
 	          <div id="ml-accuracy-chart" style="width:100%;min-height:420px;"></div>
 	          <div class="ml-status" id="ml-status">AI 분석 대기 중</div>
 	          <div class="ml-warning">
-	            브라우저 단일 파일에서 실행되는 피처 기반 교차검증입니다. 같은 기판 안에서 train/test를 나누므로
-	            날짜, 장비, 기판 배치가 바뀌었을 때의 일반화 성능보다 높게 보일 수 있습니다.
+	            Feature ML은 해석 가능한 라만 피처를 사용하고, Deep Learning은 원본 spectrum intensity 벡터를 사용합니다.
+	            같은 기판 안에서 train/test를 나누므로 날짜, 장비, 기판 배치가 바뀌었을 때의 일반화 성능보다 높게 보일 수 있습니다.
 	          </div>
 	        </div>
 	        <div class="card">
@@ -2122,8 +2122,22 @@ input[type="range"]::-moz-range-thumb {
 
 	  // ─── Browser ML Analysis ─────────────────────────────────────
 	  var mlRunToken = 0;
-	  var ML_FEATURE_KEYS = ['g_position', 'g_fwhm', 'd_g_ratio', 'i2d_ig_ratio'];
-	  var ML_FEATURE_LABELS = ['G-pos', 'G-FWHM', 'D/G', '2D/G'];
+	  var ML_FEATURE_KEYS = [
+	    'g_position','g_intensity','g_fwhm','g_area','g_prominence','g_asymmetry',
+	    'd_position','d_intensity','d_area','d_prominence',
+	    'd2_position','d2_intensity','d2_area','d2_prominence',
+	    'd_g_ratio','i2d_ig_ratio','d_g_area_ratio','d2_g_area_ratio',
+	    'd_g_distance','d2_g_distance','baseline_slope','baseline_offset','noise_level','snr_g'
+	  ];
+	  var ML_FEATURE_LABELS = {
+	    g_position:'G 위치', g_intensity:'G 강도', g_fwhm:'G FWHM', g_area:'G 면적', g_prominence:'G prominence', g_asymmetry:'G asymmetry',
+	    d_position:'D 위치', d_intensity:'D 강도', d_area:'D 면적', d_prominence:'D prominence',
+	    d2_position:'2D 위치', d2_intensity:'2D 강도', d2_area:'2D 면적', d2_prominence:'2D prominence',
+	    d_g_ratio:'D/G 강도비', i2d_ig_ratio:'2D/G 강도비', d_g_area_ratio:'D/G 면적비', d2_g_area_ratio:'2D/G 면적비',
+	    d_g_distance:'G-D 간격', d2_g_distance:'2D-G 간격', baseline_slope:'baseline slope', baseline_offset:'baseline offset',
+	    noise_level:'noise level', snr_g:'G SNR'
+	  };
+	  var RAW_VECTOR_SIZE = 96;
 
 	  function startMlAnalysisAsync() {
 	    var token = ++mlRunToken;
@@ -2183,6 +2197,129 @@ input[type="range"]::-moz-range-thumb {
 	    }, 0);
 	  }
 
+	  function rangeStats(wavelengths, spectrum, minWl, maxWl) {
+	    var vals = [], xs = [];
+	    for (var i = 0; i < wavelengths.length; i++) {
+	      if (wavelengths[i] >= minWl && wavelengths[i] <= maxWl && isFinite(spectrum[i])) {
+	        xs.push(wavelengths[i]);
+	        vals.push(spectrum[i]);
+	      }
+	    }
+	    if (!vals.length) return { max: NaN, maxPos: NaN, min: NaN, mean: NaN, area: NaN, slope: NaN };
+	    var max = -Infinity, maxPos = NaN, min = Infinity, area = 0;
+	    vals.forEach(function(v, i) {
+	      if (v > max) { max = v; maxPos = xs[i]; }
+	      if (v < min) min = v;
+	      if (i > 0) area += (vals[i - 1] + v) * 0.5 * (xs[i] - xs[i - 1]);
+	    });
+	    var mx = mean(xs), my = mean(vals), num = 0, den = 0;
+	    for (var j = 0; j < vals.length; j++) {
+	      num += (xs[j] - mx) * (vals[j] - my);
+	      den += (xs[j] - mx) * (xs[j] - mx);
+	    }
+	    return { max: max, maxPos: maxPos, min: min, mean: my, area: area, slope: den ? num / den : 0 };
+	  }
+
+	  function estimateBaseline(wavelengths, spectrum) {
+	    var left = rangeStats(wavelengths, spectrum, 1200, 1280);
+	    var right = rangeStats(wavelengths, spectrum, 2850, 2950);
+	    if (isNaN(left.mean) || isNaN(right.mean)) {
+	      left = rangeStats(wavelengths, spectrum, wavelengths[0], wavelengths[Math.min(20, wavelengths.length - 1)]);
+	      right = rangeStats(wavelengths, spectrum, wavelengths[Math.max(0, wavelengths.length - 21)], wavelengths[wavelengths.length - 1]);
+	    }
+	    var x1 = isNaN(left.mean) ? wavelengths[0] : 1240;
+	    var x2 = isNaN(right.mean) ? wavelengths[wavelengths.length - 1] : 2900;
+	    var y1 = isNaN(left.mean) ? spectrum[0] : left.mean;
+	    var y2 = isNaN(right.mean) ? spectrum[spectrum.length - 1] : right.mean;
+	    var slope = (y2 - y1) / Math.max(1, x2 - x1);
+	    return { slope: slope, offset: y1 - slope * x1, at: function(x) { return slope * x + (y1 - slope * x1); } };
+	  }
+
+	  function integrateAboveBaseline(wavelengths, spectrum, minWl, maxWl, baseline) {
+	    var prevX = null, prevY = null, area = 0;
+	    for (var i = 0; i < wavelengths.length; i++) {
+	      var x = wavelengths[i];
+	      if (x < minWl || x > maxWl) continue;
+	      var y = Math.max(0, spectrum[i] - baseline.at(x));
+	      if (prevX !== null) area += (prevY + y) * 0.5 * (x - prevX);
+	      prevX = x;
+	      prevY = y;
+	    }
+	    return area;
+	  }
+
+	  function peakAsymmetry(wavelengths, spectrum, peakIdx) {
+	    if (peakIdx < 2 || peakIdx > spectrum.length - 3) return 0;
+	    var left = spectrum[peakIdx] - spectrum[peakIdx - 2];
+	    var right = spectrum[peakIdx] - spectrum[peakIdx + 2];
+	    var denom = Math.abs(left) + Math.abs(right);
+	    return denom ? (right - left) / denom : 0;
+	  }
+
+	  function extractMlFeatureRow(wavelengths, spectrum) {
+	    var baseline = estimateBaseline(wavelengths, spectrum);
+	    var d = findPeakInRange(wavelengths, spectrum, D_RANGE[0], D_RANGE[1]);
+	    var g = findPeakInRange(wavelengths, spectrum, G_RANGE[0], G_RANGE[1]);
+	    var d2 = findPeakInRange(wavelengths, spectrum, D2_RANGE[0], D2_RANGE[1]);
+	    var dStats = rangeStats(wavelengths, spectrum, D_RANGE[0], D_RANGE[1]);
+	    var gStats = rangeStats(wavelengths, spectrum, G_RANGE[0], G_RANGE[1]);
+	    var d2Stats = rangeStats(wavelengths, spectrum, D2_RANGE[0], D2_RANGE[1]);
+	    var noiseStats = rangeStats(wavelengths, spectrum, 1800, 2200);
+	    var noise = isNaN(noiseStats.mean) ? 1 : stdDev(wavelengths.map(function(_, i) {
+	      return wavelengths[i] >= 1800 && wavelengths[i] <= 2200 ? spectrum[i] : NaN;
+	    }).filter(function(v) { return !isNaN(v); }));
+	    if (!noise || isNaN(noise)) noise = 1;
+	    var gArea = integrateAboveBaseline(wavelengths, spectrum, G_RANGE[0], G_RANGE[1], baseline);
+	    var dArea = integrateAboveBaseline(wavelengths, spectrum, D_RANGE[0], D_RANGE[1], baseline);
+	    var d2Area = integrateAboveBaseline(wavelengths, spectrum, D2_RANGE[0], D2_RANGE[1], baseline);
+	    var gBase = g ? baseline.at(g.position) : NaN;
+	    var dBase = d ? baseline.at(d.position) : NaN;
+	    var d2Base = d2 ? baseline.at(d2.position) : NaN;
+	    return {
+	      g_position: g ? g.position : NaN,
+	      g_intensity: g ? g.intensity : NaN,
+	      g_fwhm: (g && g.index >= 0) ? calcFWHM(wavelengths, spectrum, g.index) : NaN,
+	      g_area: gArea,
+	      g_prominence: g ? g.intensity - gBase : NaN,
+	      g_asymmetry: g ? peakAsymmetry(wavelengths, spectrum, g.index) : NaN,
+	      d_position: d ? d.position : NaN,
+	      d_intensity: d ? d.intensity : NaN,
+	      d_area: dArea,
+	      d_prominence: d ? d.intensity - dBase : NaN,
+	      d2_position: d2 ? d2.position : NaN,
+	      d2_intensity: d2 ? d2.intensity : NaN,
+	      d2_area: d2Area,
+	      d2_prominence: d2 ? d2.intensity - d2Base : NaN,
+	      d_g_ratio: (d && g && g.intensity > 0) ? d.intensity / g.intensity : NaN,
+	      i2d_ig_ratio: (d2 && g && g.intensity > 0) ? d2.intensity / g.intensity : NaN,
+	      d_g_area_ratio: gArea > 0 ? dArea / gArea : NaN,
+	      d2_g_area_ratio: gArea > 0 ? d2Area / gArea : NaN,
+	      d_g_distance: (d && g) ? g.position - d.position : NaN,
+	      d2_g_distance: (d2 && g) ? d2.position - g.position : NaN,
+	      baseline_slope: baseline.slope,
+	      baseline_offset: baseline.offset,
+	      noise_level: noise,
+	      snr_g: g ? (g.intensity - gBase) / noise : NaN
+	    };
+	  }
+
+	  function rawSpectrumVector(wavelengths, spectrum, size) {
+	    var start = wavelengths[0], end = wavelengths[wavelengths.length - 1];
+	    var vec = [];
+	    for (var i = 0; i < size; i++) {
+	      var target = start + (end - start) * i / Math.max(1, size - 1);
+	      var idx = 0;
+	      while (idx < wavelengths.length - 1 && wavelengths[idx + 1] < target) idx++;
+	      var x1 = wavelengths[idx], x2 = wavelengths[Math.min(idx + 1, wavelengths.length - 1)];
+	      var y1 = spectrum[idx], y2 = spectrum[Math.min(idx + 1, spectrum.length - 1)];
+	      var t = x2 === x1 ? 0 : (target - x1) / (x2 - x1);
+	      vec.push(y1 + t * (y2 - y1));
+	    }
+	    var m = mean(vec), s = stdDev(vec);
+	    if (!s || isNaN(s)) s = 1;
+	    return vec.map(function(v) { return (v - m) / s; });
+	  }
+
 	  function buildMlDatasets(wafer) {
 	    var datasets = [];
 	    KNOWN_CONCS_DISPLAY.forEach(function(conc) {
@@ -2195,51 +2332,53 @@ input[type="range"]::-moz-range-thumb {
 	      if (!fQ.filtered.length) fQ.filtered = fData.spectra;
 	      if (!cQ.filtered.length) cQ.filtered = cData.spectra;
 
-	      var fFeats = extractAllFeatures(fData.wavelengths, fQ.filtered);
-	      var cFeats = extractAllFeatures(cData.wavelengths, cQ.filtered);
-	      var X = [], y = [];
-	      function addRows(features, label) {
-	        features.forEach(function(row) {
-	          var vec = ML_FEATURE_KEYS.map(function(k) { return row[k]; });
-	          if (vec.every(function(v) { return !isNaN(v) && isFinite(v); })) {
-	            X.push(vec);
-	            y.push(label);
-	          }
-	        });
-	      }
-	      addRows(cFeats, 0);
-	      addRows(fFeats, 1);
-	      var nControl = y.filter(function(v) { return v === 0; }).length;
-	      var nFibril = y.length - nControl;
-	      if (nControl >= 4 && nFibril >= 4) {
-	        datasets.push({ conc: conc, logConc: Math.log10(CONC_MOLAR[conc]), X: X, y: y, nControl: nControl, nFibril: nFibril });
-	      }
+		      var X = [], rawX = [], y = [];
+		      function addRows(wavelengths, spectra, label) {
+		        spectra.forEach(function(sp) {
+		          var row = extractMlFeatureRow(wavelengths, sp);
+		          var vec = ML_FEATURE_KEYS.map(function(k) { return row[k]; });
+		          if (vec.every(function(v) { return !isNaN(v) && isFinite(v); })) {
+		            X.push(vec);
+		            rawX.push(rawSpectrumVector(wavelengths, sp, RAW_VECTOR_SIZE));
+		            y.push(label);
+		          }
+		        });
+		      }
+		      addRows(cData.wavelengths, cQ.filtered, 0);
+		      addRows(fData.wavelengths, fQ.filtered, 1);
+		      var nControl = y.filter(function(v) { return v === 0; }).length;
+		      var nFibril = y.length - nControl;
+		      if (nControl >= 4 && nFibril >= 4) {
+		        datasets.push({ conc: conc, logConc: Math.log10(CONC_MOLAR[conc]), X: X, rawX: rawX, y: y, nControl: nControl, nFibril: nFibril });
+		      }
 	    });
 	    return datasets;
 	  }
 
 	  function getMlModels() {
 	    return [
-	      { key: 'logreg', name: 'Logistic Regression', train: trainLogisticRegression },
-	      { key: 'knn', name: 'kNN (k=5)', train: trainKnn },
-	      { key: 'gnb', name: 'Gaussian Naive Bayes', train: trainGaussianNb },
-	      { key: 'centroid', name: 'Nearest Centroid', train: trainNearestCentroid },
-	      { key: 'stump', name: 'Decision Stump', train: trainDecisionStump },
-	      { key: 'forest', name: 'Random Subspace Forest', train: trainRandomSubspaceForest }
+	      { key: 'logreg', name: 'Feature ML: Logistic Regression', input: 'feature', train: trainLogisticRegression },
+	      { key: 'knn', name: 'Feature ML: kNN (k=5)', input: 'feature', train: trainKnn },
+	      { key: 'gnb', name: 'Feature ML: Gaussian Naive Bayes', input: 'feature', train: trainGaussianNb },
+	      { key: 'centroid', name: 'Feature ML: Nearest Centroid', input: 'feature', train: trainNearestCentroid },
+	      { key: 'stump', name: 'Feature ML: Decision Stump', input: 'feature', train: trainDecisionStump },
+	      { key: 'forest', name: 'Feature ML: Random Subspace Forest', input: 'feature', train: trainRandomSubspaceForest },
+	      { key: 'raw_mlp', name: 'Deep Learning: Raw Spectrum MLP', input: 'raw', train: trainRawSpectrumMlp }
 	    ];
 	  }
 
 	  function evaluateMlModel(model, dataset) {
-	    var folds = makeStratifiedFolds(dataset.y, 5);
+	    var Xall = model.input === 'raw' ? dataset.rawX : dataset.X;
+	    var folds = makeStratifiedFolds(dataset.y, model.input === 'raw' ? 3 : 5);
 	    if (folds.length < 2) {
-	      return { modelKey: model.key, modelName: model.name, conc: dataset.conc, accuracy: NaN, n: dataset.y.length, folds: folds.length };
+	      return { modelKey: model.key, modelName: model.name, input: model.input, conc: dataset.conc, accuracy: NaN, n: dataset.y.length, folds: folds.length };
 	    }
 	    var correct = 0, total = 0;
 	    folds.forEach(function(testIdxs) {
 	      var testSet = {};
 	      testIdxs.forEach(function(i) { testSet[i] = true; });
 	      var trainX = [], trainY = [], testX = [], testY = [];
-	      dataset.X.forEach(function(x, i) {
+	      Xall.forEach(function(x, i) {
 	        if (testSet[i]) { testX.push(x); testY.push(dataset.y[i]); }
 	        else { trainX.push(x); trainY.push(dataset.y[i]); }
 	      });
@@ -2254,6 +2393,7 @@ input[type="range"]::-moz-range-thumb {
 	    return {
 	      modelKey: model.key,
 	      modelName: model.name,
+	      input: model.input,
 	      conc: dataset.conc,
 	      logConc: dataset.logConc,
 	      accuracy: total ? correct / total : NaN,
@@ -2374,7 +2514,7 @@ input[type="range"]::-moz-range-thumb {
 	  }
 
 	  function trainDecisionStump(X, y) {
-	    var stump = fitDecisionStump(X, y, [0, 1, 2, 3]);
+	    var stump = fitDecisionStump(X, y, X[0].map(function(_, i) { return i; }));
 	    return { predict: function(x) { return predictStump(stump, x); }};
 	  }
 
@@ -2424,6 +2564,50 @@ input[type="range"]::-moz-range-thumb {
 	    }};
 	  }
 
+	  function trainRawSpectrumMlp(X, y) {
+	    var input = X[0].length;
+	    var hidden = 14;
+	    var lr = 0.018;
+	    var epochs = 35;
+	    var w1 = Array.from({ length: hidden }, function(_, h) {
+	      return Array.from({ length: input }, function(_, j) {
+	        return Math.sin((h + 1) * (j + 3)) * 0.035;
+	      });
+	    });
+	    var b1 = Array(hidden).fill(0);
+	    var w2 = Array.from({ length: hidden }, function(_, h) { return Math.cos(h + 2) * 0.035; });
+	    var b2 = 0;
+	    function forward(x) {
+	      var h = [];
+	      for (var i = 0; i < hidden; i++) {
+	        var z = b1[i];
+	        for (var j = 0; j < input; j++) z += w1[i][j] * x[j];
+	        h[i] = Math.max(0, z);
+	      }
+	      var out = b2;
+	      for (var k = 0; k < hidden; k++) out += w2[k] * h[k];
+	      return { h: h, p: sigmoid(out) };
+	    }
+	    for (var ep = 0; ep < epochs; ep++) {
+	      for (var n = 0; n < X.length; n++) {
+	        var x = X[n];
+	        var f = forward(x);
+	        var dz2 = f.p - y[n];
+	        for (var h = 0; h < hidden; h++) {
+	          var oldW2 = w2[h];
+	          w2[h] -= lr * dz2 * f.h[h];
+	          if (f.h[h] > 0) {
+	            var dz1 = dz2 * oldW2;
+	            for (var j = 0; j < input; j++) w1[h][j] -= lr * dz1 * x[j];
+	            b1[h] -= lr * dz1;
+	          }
+	        }
+	        b2 -= lr * dz2;
+	      }
+	    }
+	    return { predict: function(x) { return forward(x).p >= 0.5 ? 1 : 0; } };
+	  }
+
 	  function renderMlAccuracyChart(results) {
 	    var chartEl = document.getElementById('ml-accuracy-chart');
 	    if (!chartEl) return;
@@ -2458,10 +2642,35 @@ input[type="range"]::-moz-range-thumb {
 	    Plotly.newPlot('ml-accuracy-chart', traces, layout, { responsive: true, displayModeBar: false });
 	  }
 
+	  function computeFeatureImportance(datasets) {
+	    var scores = ML_FEATURE_KEYS.map(function(key, j) {
+	      var vals = [];
+	      datasets.forEach(function(ds) {
+	        var c = [], f = [];
+	        ds.X.forEach(function(row, i) {
+	          (ds.y[i] === 1 ? f : c).push(row[j]);
+	        });
+	        var mc = mean(c), mf = mean(f), sc = stdDev(c), sf = stdDev(f);
+	        var pooled = Math.sqrt((((c.length - 1) * sc * sc) + ((f.length - 1) * sf * sf)) / Math.max(1, c.length + f.length - 2));
+	        if (pooled && !isNaN(pooled)) vals.push(Math.abs((mf - mc) / pooled));
+	      });
+	      return { key: key, label: ML_FEATURE_LABELS[key] || key, score: vals.length ? mean(vals) : 0 };
+	    });
+	    return scores.sort(function(a, b) { return b.score - a.score; });
+	  }
+
 	  function renderMlModelDetails(results, datasets, models) {
 	    var el = document.getElementById('ml-model-details');
 	    if (!el) return;
-	    var html = '';
+	    var importance = computeFeatureImportance(datasets).slice(0, 10);
+	    var html = '<div class="ml-model-card"><h3>Feature ML 입력 피처 중요도</h3>' +
+	      '<div class="metric"><span>입력 피처 수</span><strong>' + ML_FEATURE_KEYS.length + '개</strong></div>' +
+	      '<div class="metric"><span>산출 기준</span><strong>평균 |Cohen d|</strong></div>' +
+	      '<table><thead><tr><th>피처</th><th>점수</th></tr></thead><tbody>' +
+	      importance.map(function(item) {
+	        return '<tr><td>' + item.label + '</td><td>' + item.score.toFixed(2) + '</td></tr>';
+	      }).join('') +
+	      '</tbody></table></div>';
 	    models.forEach(function(model) {
 	      var rows = results.filter(function(r) { return r.modelKey === model.key; })
 	        .sort(function(a, b) { return a.logConc - b.logConc; });
@@ -2470,6 +2679,7 @@ input[type="range"]::-moz-range-thumb {
 	      var best = rows.reduce(function(b, r) { return (!b || r.accuracy > b.accuracy) ? r : b; }, null);
 	      var worst = rows.reduce(function(b, r) { return (!b || r.accuracy < b.accuracy) ? r : b; }, null);
 	      html += '<div class="ml-model-card"><h3>' + model.name + '</h3>' +
+	        '<div class="metric"><span>입력</span><strong>' + (model.input === 'raw' ? '원본 spectrum ' + RAW_VECTOR_SIZE + '차원' : '해석 피처 ' + ML_FEATURE_KEYS.length + '개') + '</strong></div>' +
 	        '<div class="metric"><span>평균 정확도</span><strong>' + (isNaN(avg) ? '—' : (avg * 100).toFixed(1) + '%') + '</strong></div>' +
 	        '<div class="metric"><span>완료 농도</span><strong>' + rows.length + '/' + datasets.length + '</strong></div>' +
 	        '<div class="metric"><span>최고/최저</span><strong>' + (best ? best.conc + ' / ' + worst.conc : '—') + '</strong></div>' +
