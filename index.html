@@ -664,6 +664,60 @@ input[type="range"]::-moz-range-thumb {
   text-decoration: none;
 }
 .ai-reference-card a:hover { text-decoration: underline; }
+.ml-status {
+  color: #6B6B6B;
+  font-size: 13px;
+  margin-top: 10px;
+}
+.ml-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.ml-model-card {
+  background: #fff;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  padding: 16px;
+}
+.ml-model-card h3 {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.ml-model-card .metric {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  padding: 3px 0;
+  color: #3A3A3A;
+}
+.ml-model-card .metric strong { color: #1A1A1A; }
+.ml-model-card table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.ml-model-card th,
+.ml-model-card td {
+  padding: 6px 4px;
+  border-bottom: 1px solid #F0EDE8;
+  text-align: right;
+}
+.ml-model-card th:first-child,
+.ml-model-card td:first-child { text-align: left; }
+.ml-warning {
+  background: #FFF8E1;
+  border: 1px solid #FFE082;
+  color: #6B4F00;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 14px;
+}
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -737,29 +791,49 @@ input[type="range"]::-moz-range-thumb {
     <!-- Active wafer banner -->
     <div id="active-wafer-banner" class="no-active">기판을 업로드하면 분석 대상이 표시됩니다.</div>
 
-    <!-- Tab Bar -->
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="ai">AI 분석</button>
-      <button class="tab-btn" data-tab="raw">로우데이터</button>
-    </div>
+	    <!-- Tab Bar -->
+	    <div class="tab-bar">
+	      <button class="tab-btn active" data-tab="ai">AI 분석</button>
+	      <button class="tab-btn" data-tab="raw">단순 통계분석</button>
+	    </div>
 
-    <!-- AI Tab -->
-    <div class="tab-panel active" id="tab-ai">
-      <!-- Concentration checklist (active wafer) -->
+	    <!-- AI Tab -->
+	    <div class="tab-panel active" id="tab-ai">
+	      <!-- Concentration checklist (active wafer) -->
       <div class="card" style="padding: 16px 28px;">
         <div class="ai-conc-checklist" id="ai-conc-checklist" style="display:none;">
           <h4>감지된 농도</h4>
           <div class="ai-conc-grid" id="ai-conc-grid"></div>
         </div>
-        <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>다중 농도 분석 시작</button>
-      </div>
+	        <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>AI + 단순 통계 분석 시작</button>
+	      </div>
 
-      <!-- AI Analysis Results -->
-      <div id="ai-results">
+	      <div id="ml-results" style="display:none;">
+	        <div class="card">
+	          <div class="chart-title" style="font-weight:700;margin-bottom:12px;">모델별 농도 분류 정확도</div>
+	          <div id="ml-accuracy-chart" style="width:100%;min-height:420px;"></div>
+	          <div class="ml-status" id="ml-status">AI 분석 대기 중</div>
+	          <div class="ml-warning">
+	            브라우저 단일 파일에서 실행되는 피처 기반 교차검증입니다. 같은 기판 안에서 train/test를 나누므로
+	            날짜, 장비, 기판 배치가 바뀌었을 때의 일반화 성능보다 높게 보일 수 있습니다.
+	          </div>
+	        </div>
+	        <div class="card">
+	          <div class="chart-title" style="font-weight:700;margin-bottom:12px;">모델별 상세 결과</div>
+	          <div id="ml-model-details" class="ml-detail-grid"></div>
+	        </div>
+	      </div>
 
-        <!-- Overview badges -->
-        <div class="card">
-          <div class="ai-overview-row" id="ai-overview-row"></div>
+	    </div>
+
+	    <!-- Simple Statistics Tab -->
+	    <div class="tab-panel" id="tab-raw">
+	      <!-- Simple Statistics Results -->
+	      <div id="ai-results">
+
+	        <!-- Overview badges -->
+	        <div class="card">
+	          <div class="ai-overview-row" id="ai-overview-row"></div>
           <div id="ai-summary-lines"></div>
         </div>
 
@@ -791,7 +865,7 @@ input[type="range"]::-moz-range-thumb {
         <div class="ai-reference-card" id="ai-stat-reference-card">
           <h3>통계 방법 및 레퍼런스</h3>
           <p>
-            AI 분석은 농도별 Fibril/Control 분포를 비모수 검정으로 비교하고,
+	            단순 통계 분석은 농도별 Fibril/Control 분포를 비모수 검정으로 비교하고,
             효과크기와 농도-반응 순위상관을 함께 표시합니다. p-value는 탐색적 비교 기준이며,
             현재 화면에서는 다중비교 보정을 적용하지 않습니다.
           </p>
@@ -822,14 +896,11 @@ input[type="range"]::-moz-range-thumb {
           </ol>
         </div>
 
-      </div>
-    </div>
+	      </div>
 
-    <!-- Raw Tab -->
-    <div class="tab-panel" id="tab-raw">
-      <!-- CSV → Excel 통합 다운로드 -->
-      <div class="card raw-subcard">
-        <div class="card-title" style="font-weight:700; margin-bottom:12px;">CSV → Excel 통합</div>
+	      <!-- CSV → Excel 통합 다운로드 -->
+	      <div class="card raw-subcard">
+	        <div class="card-title" style="font-weight:700; margin-bottom:12px;">CSV → Excel 통합</div>
         <p style="color:#6B6B6B; font-size:14px; margin-bottom:16px;">
           업로드한 모든 기판의 CSV 스펙트럼을 하나의 엑셀 파일로 병합하여 다운로드합니다.
           시트명은 <code>W1_Fibril_농도</code>, <code>W2_Control_농도</code> 형식입니다.
@@ -912,15 +983,27 @@ input[type="range"]::-moz-range-thumb {
       document.getElementById('tab-ai').classList.toggle('active', tab === 'ai');
       document.getElementById('tab-raw').classList.toggle('active', tab === 'raw');
       hideError();
-      if (tab === 'raw') {
-        if (typeof renderPdfStyleChart === 'function') renderPdfStyleChart();
-        if (typeof updateRawConcSelector === 'function') updateRawConcSelector();
-        if (currentDrillConc) {
-          renderDrillStats(currentDrillConc);
-          renderDrillSpectrum(currentDrillConc);
-          renderDrillGPeakHist(currentDrillConc);
-        }
-      }
+	      if (tab === 'raw') {
+	        if (typeof renderPdfStyleChart === 'function') renderPdfStyleChart();
+	        if (typeof updateRawConcSelector === 'function') updateRawConcSelector();
+	        if (window.Plotly && Plotly.Plots) {
+	          ['ai-dose-response-chart','ai-heatmap-chart','raw-spectrum-plot','raw-gpeak-hist'].forEach(function(id) {
+	            var el = document.getElementById(id);
+	            if (el) Plotly.Plots.resize(el);
+	          });
+	          document.querySelectorAll('[id^="ai-detail-boxplot-"]').forEach(function(el) {
+	            Plotly.Plots.resize(el);
+	          });
+	        }
+	        if (currentDrillConc) {
+	          renderDrillStats(currentDrillConc);
+	          renderDrillSpectrum(currentDrillConc);
+	          renderDrillGPeakHist(currentDrillConc);
+	        }
+	      } else if (tab === 'ai' && window.Plotly && Plotly.Plots) {
+	        var mlChart = document.getElementById('ml-accuracy-chart');
+	        if (mlChart) Plotly.Plots.resize(mlChart);
+	      }
     });
   });
 
@@ -1147,14 +1230,16 @@ input[type="range"]::-moz-range-thumb {
     });
   }
 
-  function setActiveWafer(id) {
-    if (activeWaferId === id) return;
-    activeWaferId = id;
-    // Clear AI results (stale)
-    var aiRes = document.getElementById('ai-results');
-    if (aiRes) aiRes.classList.remove('visible');
-    // Reset drill conc if not present in new wafer
-    var w = getActiveWafer();
+	  function setActiveWafer(id) {
+	    if (activeWaferId === id) return;
+	    activeWaferId = id;
+	    // Clear analysis results (stale)
+	    var aiRes = document.getElementById('ai-results');
+	    if (aiRes) aiRes.classList.remove('visible');
+	    var mlRes = document.getElementById('ml-results');
+	    if (mlRes) mlRes.style.display = 'none';
+	    // Reset drill conc if not present in new wafer
+	    var w = getActiveWafer();
     if (currentDrillConc && w) {
       var hasF = w.fibril[currentDrillConc] && w.fibril[currentDrillConc].spectra.length > 0;
       var hasC = w.control[currentDrillConc] && w.control[currentDrillConc].spectra.length > 0;
@@ -1174,12 +1259,14 @@ input[type="range"]::-moz-range-thumb {
     wafers.splice(idx, 1);
     if (activeWaferId === id) {
       activeWaferId = wafers[0] ? wafers[0].id : null;
-      currentDrillConc = null;
-      var aiRes = document.getElementById('ai-results');
-      if (aiRes) aiRes.classList.remove('visible');
-    }
-    onWafersChanged();
-  }
+	      currentDrillConc = null;
+	      var aiRes = document.getElementById('ai-results');
+	      if (aiRes) aiRes.classList.remove('visible');
+	      var mlRes = document.getElementById('ml-results');
+	      if (mlRes) mlRes.style.display = 'none';
+	    }
+	    onWafersChanged();
+	  }
 
   function renameWafer(id, name) {
     var w = wafers.find(function(x){ return x.id === id; });
@@ -1348,9 +1435,9 @@ input[type="range"]::-moz-range-thumb {
     btnAiAnalyze.disabled = !anyPair;
   }
 
-  btnAiAnalyze.addEventListener('click', function() {
-    runAiMultiAnalysis();
-  });
+	  btnAiAnalyze.addEventListener('click', function() {
+	    runCombinedAnalysis();
+	  });
 
   // ─── Peak Utilities ───
   function findPeakInRange(wavelengths, spectrum, minWl, maxWl) {
@@ -1547,9 +1634,9 @@ input[type="range"]::-moz-range-thumb {
   }
 
   // ─── Multi-Concentration Analysis Runner ───
-  function runAiMultiAnalysis() {
-    hideError();
-    var activeW = getActiveWafer();
+	  function runAiMultiAnalysis() {
+	    hideError();
+	    var activeW = getActiveWafer();
     if (!activeW) {
       showError('활성 기판이 없습니다. 사이드바에서 기판을 선택하세요.');
       return;
@@ -1667,8 +1754,13 @@ input[type="range"]::-moz-range-thumb {
     renderDetailTabs(concResults, featureLabels);
     renderOpenSummary(concResults, crossConc, featureLabels, bestFeatureKey, detectionLimit);
 
-    document.getElementById('ai-results').classList.add('visible');
-  }
+	    document.getElementById('ai-results').classList.add('visible');
+	  }
+
+	  function runCombinedAnalysis() {
+	    runAiMultiAnalysis();
+	    startMlAnalysisAsync();
+	  }
 
   // ─── Render: Overview Badges ───
   function renderOverviewBadges(concResults) {
@@ -1978,8 +2070,8 @@ input[type="range"]::-moz-range-thumb {
   }
 
   // ─── Render: Open Summary ───
-  function renderOpenSummary(concResults, crossConc, featureLabels, bestFeatureKey, detectionLimit) {
-    var bullets = [];
+	  function renderOpenSummary(concResults, crossConc, featureLabels, bestFeatureKey, detectionLimit) {
+	    var bullets = [];
 
     // Count concentrations with any significant difference
     var nWithDiff = concResults.filter(function(cr) {
@@ -2023,12 +2115,374 @@ input[type="range"]::-moz-range-thumb {
       bullets.push('추가 검증이 필요한 농도: ' + names);
     }
 
-    document.getElementById('ai-summary-bullets').innerHTML = bullets.map(function(b) {
-      return '<li>' + b + '</li>';
-    }).join('');
-  }
+	    document.getElementById('ai-summary-bullets').innerHTML = bullets.map(function(b) {
+	      return '<li>' + b + '</li>';
+	    }).join('');
+	  }
 
-  // ─── CSV → Excel 통합 다운로드 (all wafers) ───
+	  // ─── Browser ML Analysis ─────────────────────────────────────
+	  var mlRunToken = 0;
+	  var ML_FEATURE_KEYS = ['g_position', 'g_fwhm', 'd_g_ratio', 'i2d_ig_ratio'];
+	  var ML_FEATURE_LABELS = ['G-pos', 'G-FWHM', 'D/G', '2D/G'];
+
+	  function startMlAnalysisAsync() {
+	    var token = ++mlRunToken;
+	    var activeW = getActiveWafer();
+	    var resultEl = document.getElementById('ml-results');
+	    var statusEl = document.getElementById('ml-status');
+	    var detailEl = document.getElementById('ml-model-details');
+	    var chartEl = document.getElementById('ml-accuracy-chart');
+	    if (!resultEl || !statusEl || !detailEl || !chartEl) return;
+	    resultEl.style.display = 'block';
+	    detailEl.innerHTML = '';
+	    chartEl.innerHTML = '<div style="text-align:center;padding:80px 20px;color:#9E9E9E;font-size:13px;">AI 모델 평가 준비 중</div>';
+	    statusEl.textContent = 'AI 분석 준비 중... 단순 통계분석 탭은 바로 확인할 수 있습니다.';
+
+	    if (!activeW) {
+	      statusEl.textContent = '활성 기판이 없습니다.';
+	      return;
+	    }
+
+	    setTimeout(function() {
+	      if (token !== mlRunToken) return;
+	      var datasets = buildMlDatasets(activeW);
+	      if (!datasets.length) {
+	        statusEl.textContent = 'Fibril과 Control이 모두 있는 농도 데이터가 없습니다.';
+	        chartEl.innerHTML = '<div style="text-align:center;padding:80px 20px;color:#9E9E9E;font-size:13px;">분석 가능한 농도쌍 없음</div>';
+	        return;
+	      }
+
+	      var models = getMlModels();
+	      var tasks = [];
+	      datasets.forEach(function(ds) {
+	        models.forEach(function(model) {
+	          tasks.push({ dataset: ds, model: model });
+	        });
+	      });
+
+	      var results = [];
+	      var done = 0;
+	      function step() {
+	        if (token !== mlRunToken) return;
+	        if (done >= tasks.length) {
+	          statusEl.textContent = 'AI 분석 완료: ' + datasets.length + '개 농도, ' + models.length + '개 모델 평가';
+	          renderMlAccuracyChart(results);
+	          renderMlModelDetails(results, datasets, models);
+	          return;
+	        }
+	        var task = tasks[done];
+	        var res = evaluateMlModel(task.model, task.dataset);
+	        results.push(res);
+	        done++;
+	        statusEl.textContent = 'AI 분석 중... ' + done + '/' + tasks.length + ' (' + task.dataset.conc + ', ' + task.model.name + ')';
+	        renderMlAccuracyChart(results);
+	        renderMlModelDetails(results, datasets, models);
+	        setTimeout(step, 0);
+	      }
+	      step();
+	    }, 0);
+	  }
+
+	  function buildMlDatasets(wafer) {
+	    var datasets = [];
+	    KNOWN_CONCS_DISPLAY.forEach(function(conc) {
+	      var fData = wafer.fibril[conc];
+	      var cData = wafer.control[conc];
+	      if (!fData || !cData || !fData.spectra.length || !cData.spectra.length || !fData.wavelengths || !cData.wavelengths) return;
+
+	      var fQ = filterByQuality(fData.wavelengths, fData.spectra, 1.0);
+	      var cQ = filterByQuality(cData.wavelengths, cData.spectra, 1.0);
+	      if (!fQ.filtered.length) fQ.filtered = fData.spectra;
+	      if (!cQ.filtered.length) cQ.filtered = cData.spectra;
+
+	      var fFeats = extractAllFeatures(fData.wavelengths, fQ.filtered);
+	      var cFeats = extractAllFeatures(cData.wavelengths, cQ.filtered);
+	      var X = [], y = [];
+	      function addRows(features, label) {
+	        features.forEach(function(row) {
+	          var vec = ML_FEATURE_KEYS.map(function(k) { return row[k]; });
+	          if (vec.every(function(v) { return !isNaN(v) && isFinite(v); })) {
+	            X.push(vec);
+	            y.push(label);
+	          }
+	        });
+	      }
+	      addRows(cFeats, 0);
+	      addRows(fFeats, 1);
+	      var nControl = y.filter(function(v) { return v === 0; }).length;
+	      var nFibril = y.length - nControl;
+	      if (nControl >= 4 && nFibril >= 4) {
+	        datasets.push({ conc: conc, logConc: Math.log10(CONC_MOLAR[conc]), X: X, y: y, nControl: nControl, nFibril: nFibril });
+	      }
+	    });
+	    return datasets;
+	  }
+
+	  function getMlModels() {
+	    return [
+	      { key: 'logreg', name: 'Logistic Regression', train: trainLogisticRegression },
+	      { key: 'knn', name: 'kNN (k=5)', train: trainKnn },
+	      { key: 'gnb', name: 'Gaussian Naive Bayes', train: trainGaussianNb },
+	      { key: 'centroid', name: 'Nearest Centroid', train: trainNearestCentroid },
+	      { key: 'stump', name: 'Decision Stump', train: trainDecisionStump },
+	      { key: 'forest', name: 'Random Subspace Forest', train: trainRandomSubspaceForest }
+	    ];
+	  }
+
+	  function evaluateMlModel(model, dataset) {
+	    var folds = makeStratifiedFolds(dataset.y, 5);
+	    if (folds.length < 2) {
+	      return { modelKey: model.key, modelName: model.name, conc: dataset.conc, accuracy: NaN, n: dataset.y.length, folds: folds.length };
+	    }
+	    var correct = 0, total = 0;
+	    folds.forEach(function(testIdxs) {
+	      var testSet = {};
+	      testIdxs.forEach(function(i) { testSet[i] = true; });
+	      var trainX = [], trainY = [], testX = [], testY = [];
+	      dataset.X.forEach(function(x, i) {
+	        if (testSet[i]) { testX.push(x); testY.push(dataset.y[i]); }
+	        else { trainX.push(x); trainY.push(dataset.y[i]); }
+	      });
+	      var scaled = standardizeTrainTest(trainX, testX);
+	      var fitted = model.train(scaled.trainX, trainY);
+	      testX.forEach(function(_, i) {
+	        var pred = fitted.predict(scaled.testX[i]);
+	        if (pred === testY[i]) correct++;
+	        total++;
+	      });
+	    });
+	    return {
+	      modelKey: model.key,
+	      modelName: model.name,
+	      conc: dataset.conc,
+	      logConc: dataset.logConc,
+	      accuracy: total ? correct / total : NaN,
+	      n: dataset.y.length,
+	      nControl: dataset.nControl,
+	      nFibril: dataset.nFibril,
+	      folds: folds.length
+	    };
+	  }
+
+	  function makeStratifiedFolds(y, requestedK) {
+	    var idx0 = [], idx1 = [];
+	    y.forEach(function(v, i) { (v === 1 ? idx1 : idx0).push(i); });
+	    var k = Math.min(requestedK, idx0.length, idx1.length);
+	    if (k < 2) return [];
+	    var folds = Array.from({ length: k }, function() { return []; });
+	    idx0.forEach(function(idx, i) { folds[i % k].push(idx); });
+	    idx1.forEach(function(idx, i) { folds[i % k].push(idx); });
+	    return folds;
+	  }
+
+	  function standardizeTrainTest(trainX, testX) {
+	    var d = trainX[0].length;
+	    var mu = [], sd = [];
+	    for (var j = 0; j < d; j++) {
+	      var col = trainX.map(function(x) { return x[j]; });
+	      mu[j] = mean(col);
+	      sd[j] = stdDev(col);
+	      if (!sd[j] || isNaN(sd[j])) sd[j] = 1;
+	    }
+	    function tx(rows) {
+	      return rows.map(function(x) {
+	        return x.map(function(v, j) { return (v - mu[j]) / sd[j]; });
+	      });
+	    }
+	    return { trainX: tx(trainX), testX: tx(testX) };
+	  }
+
+	  function sigmoid(z) {
+	    if (z < -35) return 0;
+	    if (z > 35) return 1;
+	    return 1 / (1 + Math.exp(-z));
+	  }
+
+	  function trainLogisticRegression(X, y) {
+	    var d = X[0].length;
+	    var w = Array(d + 1).fill(0);
+	    var lr = 0.08, l2 = 0.001, epochs = 180;
+	    for (var ep = 0; ep < epochs; ep++) {
+	      var grad = Array(d + 1).fill(0);
+	      for (var i = 0; i < X.length; i++) {
+	        var z = w[0];
+	        for (var j = 0; j < d; j++) z += w[j + 1] * X[i][j];
+	        var err = sigmoid(z) - y[i];
+	        grad[0] += err;
+	        for (var g = 0; g < d; g++) grad[g + 1] += err * X[i][g];
+	      }
+	      w[0] -= lr * grad[0] / X.length;
+	      for (var k = 0; k < d; k++) w[k + 1] -= lr * (grad[k + 1] / X.length + l2 * w[k + 1]);
+	    }
+	    return { predict: function(x) {
+	      var z = w[0];
+	      for (var j = 0; j < d; j++) z += w[j + 1] * x[j];
+	      return sigmoid(z) >= 0.5 ? 1 : 0;
+	    }};
+	  }
+
+	  function trainKnn(X, y) {
+	    return { predict: function(x) {
+	      var rows = X.map(function(r, i) {
+	        var dist = 0;
+	        for (var j = 0; j < r.length; j++) dist += (r[j] - x[j]) * (r[j] - x[j]);
+	        return { dist: dist, y: y[i] };
+	      }).sort(function(a, b) { return a.dist - b.dist; });
+	      var k = Math.min(5, rows.length), vote = 0;
+	      for (var i = 0; i < k; i++) vote += rows[i].y;
+	      return vote >= k / 2 ? 1 : 0;
+	    }};
+	  }
+
+	  function trainGaussianNb(X, y) {
+	    var d = X[0].length;
+	    var stats = [0, 1].map(function(cls) {
+	      var rows = X.filter(function(_, i) { return y[i] === cls; });
+	      return {
+	        prior: rows.length / X.length,
+	        mu: Array.from({ length: d }, function(_, j) { return mean(rows.map(function(r) { return r[j]; })); }),
+	        varr: Array.from({ length: d }, function(_, j) {
+	          var s = stdDev(rows.map(function(r) { return r[j]; }));
+	          return (s && !isNaN(s) ? s * s : 1) + 1e-6;
+	        })
+	      };
+	    });
+	    return { predict: function(x) {
+	      var scores = stats.map(function(st) {
+	        var score = Math.log(st.prior || 1e-6);
+	        for (var j = 0; j < d; j++) {
+	          score += -0.5 * Math.log(2 * Math.PI * st.varr[j]) - ((x[j] - st.mu[j]) * (x[j] - st.mu[j])) / (2 * st.varr[j]);
+	        }
+	        return score;
+	      });
+	      return scores[1] >= scores[0] ? 1 : 0;
+	    }};
+	  }
+
+	  function trainNearestCentroid(X, y) {
+	    var d = X[0].length;
+	    var centroids = [0, 1].map(function(cls) {
+	      var rows = X.filter(function(_, i) { return y[i] === cls; });
+	      return Array.from({ length: d }, function(_, j) { return mean(rows.map(function(r) { return r[j]; })); });
+	    });
+	    return { predict: function(x) {
+	      function dist(c) {
+	        return c.reduce(function(s, v, j) { return s + (x[j] - v) * (x[j] - v); }, 0);
+	      }
+	      return dist(centroids[1]) <= dist(centroids[0]) ? 1 : 0;
+	    }};
+	  }
+
+	  function trainDecisionStump(X, y) {
+	    var stump = fitDecisionStump(X, y, [0, 1, 2, 3]);
+	    return { predict: function(x) { return predictStump(stump, x); }};
+	  }
+
+	  function fitDecisionStump(X, y, featurePool) {
+	    var best = { feature: 0, threshold: 0, polarity: 1, acc: -1 };
+	    featurePool.forEach(function(f) {
+	      var vals = X.map(function(r) { return r[f]; }).sort(function(a, b) { return a - b; });
+	      var steps = Math.min(vals.length - 1, 24);
+	      for (var s = 0; s <= steps; s++) {
+	        var pos = Math.floor(s * (vals.length - 1) / Math.max(1, steps));
+	        var th = vals[pos];
+	        [1, -1].forEach(function(pol) {
+	          var ok = 0;
+	          for (var i = 0; i < X.length; i++) {
+	            var pred = pol === 1 ? (X[i][f] >= th ? 1 : 0) : (X[i][f] >= th ? 0 : 1);
+	            if (pred === y[i]) ok++;
+	          }
+	          var acc = ok / X.length;
+	          if (acc > best.acc) best = { feature: f, threshold: th, polarity: pol, acc: acc };
+	        });
+	      }
+	    });
+	    return best;
+	  }
+
+	  function predictStump(stump, x) {
+	    return stump.polarity === 1 ? (x[stump.feature] >= stump.threshold ? 1 : 0) : (x[stump.feature] >= stump.threshold ? 0 : 1);
+	  }
+
+	  function trainRandomSubspaceForest(X, y) {
+	    var trees = [];
+	    var d = X[0].length;
+	    for (var t = 0; t < 35; t++) {
+	      var bx = [], by = [];
+	      for (var i = 0; i < X.length; i++) {
+	        var idx = (i * 37 + t * 17) % X.length;
+	        bx.push(X[idx]);
+	        by.push(y[idx]);
+	      }
+	      var f1 = t % d;
+	      var f2 = (t * 2 + 1) % d;
+	      trees.push(fitDecisionStump(bx, by, f1 === f2 ? [f1] : [f1, f2]));
+	    }
+	    return { predict: function(x) {
+	      var vote = trees.reduce(function(s, tree) { return s + predictStump(tree, x); }, 0);
+	      return vote >= trees.length / 2 ? 1 : 0;
+	    }};
+	  }
+
+	  function renderMlAccuracyChart(results) {
+	    var chartEl = document.getElementById('ml-accuracy-chart');
+	    if (!chartEl) return;
+	    if (!results.length) return;
+	    var byModel = {};
+	    results.forEach(function(r) {
+	      if (!byModel[r.modelName]) byModel[r.modelName] = [];
+	      byModel[r.modelName].push(r);
+	    });
+	    var traces = Object.keys(byModel).map(function(name) {
+	      var rows = byModel[name].slice().sort(function(a, b) { return a.logConc - b.logConc; });
+	      return {
+	        type: 'scatter',
+	        mode: 'markers+lines',
+	        name: name,
+	        x: rows.map(function(r) { return r.conc; }),
+	        y: rows.map(function(r) { return isNaN(r.accuracy) ? null : r.accuracy * 100; }),
+	        text: rows.map(function(r) { return 'n=' + r.n + ', folds=' + r.folds; }),
+	        marker: { size: 10 },
+	        hovertemplate: '<b>%{fullData.name}</b><br>농도: %{x}<br>정확도: %{y:.1f}%<br>%{text}<extra></extra>'
+	      };
+	    });
+	    var layout = {
+	      xaxis: { title: '농도', categoryarray: KNOWN_CONCS_DISPLAY, categoryorder: 'array' },
+	      yaxis: { title: '정확도 (%)', range: [0, 105], ticksuffix: '%' },
+	      margin: { t: 20, b: 60, l: 70, r: 20 },
+	      legend: { orientation: 'h', y: -0.22 },
+	      paper_bgcolor: 'rgba(0,0,0,0)',
+	      plot_bgcolor: 'rgba(0,0,0,0)',
+	      font: { family: 'Noto Sans KR, sans-serif' }
+	    };
+	    Plotly.newPlot('ml-accuracy-chart', traces, layout, { responsive: true, displayModeBar: false });
+	  }
+
+	  function renderMlModelDetails(results, datasets, models) {
+	    var el = document.getElementById('ml-model-details');
+	    if (!el) return;
+	    var html = '';
+	    models.forEach(function(model) {
+	      var rows = results.filter(function(r) { return r.modelKey === model.key; })
+	        .sort(function(a, b) { return a.logConc - b.logConc; });
+	      var accs = rows.map(function(r) { return r.accuracy; }).filter(function(v) { return !isNaN(v); });
+	      var avg = accs.length ? mean(accs) : NaN;
+	      var best = rows.reduce(function(b, r) { return (!b || r.accuracy > b.accuracy) ? r : b; }, null);
+	      var worst = rows.reduce(function(b, r) { return (!b || r.accuracy < b.accuracy) ? r : b; }, null);
+	      html += '<div class="ml-model-card"><h3>' + model.name + '</h3>' +
+	        '<div class="metric"><span>평균 정확도</span><strong>' + (isNaN(avg) ? '—' : (avg * 100).toFixed(1) + '%') + '</strong></div>' +
+	        '<div class="metric"><span>완료 농도</span><strong>' + rows.length + '/' + datasets.length + '</strong></div>' +
+	        '<div class="metric"><span>최고/최저</span><strong>' + (best ? best.conc + ' / ' + worst.conc : '—') + '</strong></div>' +
+	        '<table><thead><tr><th>농도</th><th>정확도</th><th>n</th></tr></thead><tbody>';
+	      rows.forEach(function(r) {
+	        html += '<tr><td>' + r.conc + '</td><td>' + (isNaN(r.accuracy) ? '—' : (r.accuracy * 100).toFixed(1) + '%') + '</td><td>' + r.n + '</td></tr>';
+	      });
+	      html += '</tbody></table></div>';
+	    });
+	    el.innerHTML = html;
+	  }
+
+	  // ─── CSV → Excel 통합 다운로드 (all wafers) ───
   function updateRawExportButton(){
     var btn = document.getElementById('btn-export-xlsx');
     var status = document.getElementById('export-status');
