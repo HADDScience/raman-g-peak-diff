@@ -630,6 +630,40 @@ input[type="range"]::-moz-range-thumb {
   color: #E07A3A;
   font-weight: 700;
 }
+.ai-reference-card {
+  background: #FAF9F6;
+  border: 1px solid #E8E5E0;
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-top: 16px;
+}
+.ai-reference-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-bottom: 10px;
+}
+.ai-reference-card p {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #5E5A54;
+}
+.ai-reference-card ol {
+  margin: 0;
+  padding-left: 18px;
+}
+.ai-reference-card li {
+  padding: 3px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #3A3A3A;
+}
+.ai-reference-card a {
+  color: #4C72B0;
+  text-decoration: none;
+}
+.ai-reference-card a:hover { text-decoration: underline; }
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -752,6 +786,40 @@ input[type="range"]::-moz-range-thumb {
         <div class="ai-summary-card" id="ai-summary-card">
           <h3>분석 요약</h3>
           <ul id="ai-summary-bullets"></ul>
+        </div>
+
+        <div class="ai-reference-card" id="ai-stat-reference-card">
+          <h3>통계 방법 및 레퍼런스</h3>
+          <p>
+            AI 분석은 농도별 Fibril/Control 분포를 비모수 검정으로 비교하고,
+            효과크기와 농도-반응 순위상관을 함께 표시합니다. p-value는 탐색적 비교 기준이며,
+            현재 화면에서는 다중비교 보정을 적용하지 않습니다.
+          </p>
+          <ol>
+            <li>
+              농도별 차이 검정: Mann-Whitney U test.
+              Mann, H. B. &amp; Whitney, D. R. (1947).
+              <a href="https://doi.org/10.1214/aoms/1177730491" target="_blank" rel="noopener">doi:10.1214/aoms/1177730491</a>
+            </li>
+            <li>
+              효과크기: Cohen's d.
+              Cohen, J. (1988). <em>Statistical Power Analysis for the Behavioral Sciences</em>.
+              <a href="https://doi.org/10.4324/9780203771587" target="_blank" rel="noopener">doi:10.4324/9780203771587</a>
+            </li>
+            <li>
+              농도-반응 추세: Spearman rank correlation.
+              Spearman, C. (1904).
+              <a href="https://doi.org/10.2307/1412159" target="_blank" rel="noopener">doi:10.2307/1412159</a>
+            </li>
+            <li>
+              검출 한계: Control 표준편차 기준 3σ 초과 시점.
+              Shewhart, W. A. (1931). <em>Economic Control of Quality of Manufactured Product</em>.
+            </li>
+            <li>
+              분포 시각화: Tukey boxplot.
+              Tukey, J. W. (1977). <em>Exploratory Data Analysis</em>.
+            </li>
+          </ol>
         </div>
 
       </div>
