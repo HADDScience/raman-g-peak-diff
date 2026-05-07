@@ -1009,12 +1009,17 @@ input[type="range"]::-moz-range-thumb {
 
   // ─── Raw Raman CSV Parsing ───
   function parseRamanCSV(text) {
-    var lines = text.split('\n');
+    var lines = text.split(/\r?\n/);
     var wavelengths = null;
     var spectra = [];
+    var mappingHeaderSeen = false;
+    var mappingPrefixCount = 6; // X,Y,Z,XINDEX,YINDEX,ZINDEX
 
     for (var i = 0; i < lines.length; i++) {
       var trimmed = lines[i].trim();
+      if (!trimmed) continue;
+
+      // ─ Legacy format: "Wavelength, , , , , <wls>"
       if (trimmed.startsWith('Wavelength ,') || trimmed.startsWith('Wavelength,')) {
         var parts = trimmed.split(/[,\t]/);
         wavelengths = [];
@@ -1022,7 +1027,11 @@ input[type="range"]::-moz-range-thumb {
           var v = parseFloat(parts[j].trim());
           if (!isNaN(v)) wavelengths.push(v);
         }
-      } else if (trimmed.startsWith('Intensity_')) {
+        continue;
+      }
+
+      // ─ Legacy format: "Intensity_NN, ..."
+      if (trimmed.startsWith('Intensity_')) {
         var parts2 = trimmed.split(/[,\t]/);
         var intensities = [];
         for (var k = 6; k < parts2.length; k++) {
@@ -1031,6 +1040,34 @@ input[type="range"]::-moz-range-thumb {
         }
         if (wavelengths && intensities.length === wavelengths.length) {
           spectra.push(intensities);
+        }
+        continue;
+      }
+
+      // ─ Mapping format header: "X,Y,Z,XINDEX,YINDEX,ZINDEX,<wls>"
+      if (/^X,Y,Z,XINDEX,YINDEX,ZINDEX,/i.test(trimmed)) {
+        var parts3 = trimmed.split(/[,\t]/);
+        wavelengths = [];
+        for (var w = mappingPrefixCount; w < parts3.length; w++) {
+          var wv = parseFloat(parts3[w].trim());
+          if (!isNaN(wv)) wavelengths.push(wv);
+        }
+        mappingHeaderSeen = true;
+        continue;
+      }
+
+      // ─ Mapping format data row: numeric prefix, after header was seen
+      if (mappingHeaderSeen && wavelengths && /^[\-\d]/.test(trimmed)) {
+        var parts4 = trimmed.split(/[,\t]/);
+        if (parts4.length >= mappingPrefixCount + wavelengths.length) {
+          var inten = [];
+          for (var m = mappingPrefixCount; m < mappingPrefixCount + wavelengths.length; m++) {
+            var mv = parseFloat(parts4[m]);
+            if (!isNaN(mv)) inten.push(mv);
+          }
+          if (inten.length === wavelengths.length) {
+            spectra.push(inten);
+          }
         }
       }
     }
