@@ -1124,15 +1124,11 @@ input[type="range"]::-moz-range-thumb {
 
   function isOMx500File(relativePath) {
     var lower = relativePath.toLowerCase();
-    // Must be inside OMx500 subfolder, not OMx100
-    if (lower.indexOf('omx500') !== -1 || lower.indexOf('om x500') !== -1 || lower.indexOf('om_x500') !== -1) return true;
-    // If there's no OMx100 or OMx500 indicator, check if there's no magnification folder at all (accept it)
-    if (lower.indexOf('omx100') === -1 && lower.indexOf('om x100') === -1 && lower.indexOf('om_x100') === -1 &&
-        lower.indexOf('omx500') === -1 && lower.indexOf('om x500') === -1 && lower.indexOf('om_x500') === -1) {
-      // No magnification folder structure: if it's a CSV in a concentration folder, accept it
-      return true;
-    }
-    return false;
+    // OMx100/OMx10은 배율 부족 → 분석 부적합으로 제외
+    // 그 외 (OMx40, OMx500, OMx1000 등) 또는 배율 폴더 없는 경우 허용
+    if (/(\/|^)omx?100(\/|$)/.test(lower) || /(\/|^)om[ _]x?100(\/|$)/.test(lower)) return false;
+    if (/(\/|^)omx?10(\/|$)/.test(lower)  || /(\/|^)om[ _]x?10(\/|$)/.test(lower))  return false;
+    return true;
   }
 
   // ─── Wafer file ingestion ───
@@ -1160,7 +1156,7 @@ input[type="range"]::-moz-range-thumb {
       }
 
       if (totalCSV === 0) {
-        reject(new Error('OMx500 폴더 내 Fibril/Control 농도별 CSV 파일을 찾을 수 없습니다. 폴더 구조를 확인하세요.'));
+        reject(new Error('Fibril/Control 농도별 CSV 파일을 찾을 수 없습니다. 폴더 구조를 확인하세요. (지원: OMx40·OMx500 등, OMx10·OMx100은 자동 제외)'));
         return;
       }
 
