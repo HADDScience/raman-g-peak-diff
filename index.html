@@ -57,8 +57,65 @@ body {
 .sidebar h2 {
   font-size: 15px;
   font-weight: 700;
-  margin-bottom: 14px;
+  margin: 0;
   color: #1A1A1A;
+}
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 8px;
+}
+.btn-add-wafer-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #E07A3A;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.btn-add-wafer-icon:hover { background: #c96a2f; }
+.wafer-progress {
+  margin-left: 24px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #6B6B6B;
+}
+.wafer-progress-bar {
+  height: 4px;
+  background: #E8E5E0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+.wafer-progress-fill {
+  height: 100%;
+  background: #E07A3A;
+  width: 0%;
+  transition: width 0.2s;
+}
+.wafer-status-done {
+  display: inline-block;
+  margin-left: 24px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #2E7D32;
+  font-weight: 700;
+  background: #E8F5E9;
+  border: 1px solid #C8E6C9;
+  border-radius: 4px;
+  padding: 2px 6px;
 }
 .main-content {
   min-width: 0;
@@ -432,13 +489,13 @@ input[type="range"]::-moz-range-thumb {
 .btn-ai-analyze {
   display: block;
   width: 100%;
-  margin-top: 18px;
-  padding: 13px 22px;
+  margin-top: 12px;
+  padding: 11px 14px;
   background: linear-gradient(135deg, #E07A3A 0%, #C0392B 100%);
   color: #fff;
   border: none;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.2s, box-shadow 0.2s;
@@ -782,21 +839,18 @@ input[type="range"]::-moz-range-thumb {
 <div class="app-layout">
   <!-- Sidebar: wafer list + add button -->
   <aside class="sidebar">
-    <h2>기판 목록</h2>
+    <div class="sidebar-header">
+      <h2>기판 목록</h2>
+      <button class="btn-add-wafer-icon" id="btn-add-wafer" title="기판 추가" aria-label="기판 추가">+</button>
+    </div>
     <div id="wafer-list"></div>
     <input type="file" id="wafer-add-input" webkitdirectory multiple style="display:none;">
-    <button class="btn-add-wafer" id="btn-add-wafer">+ 기판 추가</button>
+    <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>전체 기판 분석 시작</button>
     <div class="error-msg" id="error-msg"></div>
   </aside>
 
   <!-- Main content -->
   <main class="main-content">
-    <h1>Raman G-Peak Diff Analyzer</h1>
-    <p class="subtitle">G-peak 차이 분포를 분석합니다</p>
-
-    <!-- Active wafer banner -->
-    <div id="active-wafer-banner" class="no-active">기판을 업로드하면 분석 대상이 표시됩니다.</div>
-
 	    <!-- Tab Bar -->
 	    <div class="tab-bar">
 	      <button class="tab-btn active" data-tab="ai">AI 분석</button>
@@ -806,12 +860,11 @@ input[type="range"]::-moz-range-thumb {
 	    <!-- AI Tab -->
 	    <div class="tab-panel active" id="tab-ai">
 	      <!-- Concentration checklist (active wafer) -->
-      <div class="card" style="padding: 16px 28px;">
+      <div class="card" id="ai-conc-checklist-card" style="padding: 16px 28px; display:none;">
         <div class="ai-conc-checklist" id="ai-conc-checklist" style="display:none;">
           <h4>감지된 농도</h4>
           <div class="ai-conc-grid" id="ai-conc-grid"></div>
         </div>
-	        <button class="btn-ai-analyze" id="btn-ai-analyze" disabled>AI + 단순 통계 분석 시작</button>
 	      </div>
 
 	      <div id="ml-results" style="display:none;">
@@ -1370,16 +1423,17 @@ input[type="range"]::-moz-range-thumb {
 	  function setActiveWafer(id) {
 	    if (activeWaferId === id) return;
 	    activeWaferId = id;
-	    ++mlRunToken; // cancel any in-progress ML analysis from previous wafer
 	    var newW = wafers.find(function(x){ return x.id === id; });
+	    var analyzing = newW && newW.analysisState === 'analyzing';
 	    var aiRes = document.getElementById('ai-results');
 	    if (aiRes) {
 	      if (newW && newW.aiCache) renderAiFromCache(newW.aiCache);
-	      else aiRes.classList.remove('visible');
+	      else if (!analyzing) aiRes.classList.remove('visible');
 	    }
 	    var mlRes = document.getElementById('ml-results');
 	    if (mlRes) {
 	      if (newW && newW.mlCache) renderMlFromCache(newW.mlCache);
+	      else if (analyzing) { mlRes.style.display = 'block'; }
 	      else mlRes.style.display = 'none';
 	    }
 	    // Reset drill conc if not present in new wafer
@@ -1398,13 +1452,13 @@ input[type="range"]::-moz-range-thumb {
     var w = wafers.find(function(x){ return x.id === id; });
     if (!w) return;
     if (!confirm('"' + w.name + '" 기판을 삭제하시겠습니까?')) return;
+    w.mlToken = (w.mlToken || 0) + 1; // cancel in-progress analysis for deleted wafer
     var idx = wafers.findIndex(function(x){ return x.id === id; });
     if (idx < 0) return;
     wafers.splice(idx, 1);
     if (activeWaferId === id) {
       activeWaferId = wafers[0] ? wafers[0].id : null;
 	      currentDrillConc = null;
-	      ++mlRunToken;
 	      var newW = activeWaferId ? wafers.find(function(x){ return x.id === activeWaferId; }) : null;
 	      var aiRes = document.getElementById('ai-results');
 	      if (aiRes) {
@@ -1454,6 +1508,9 @@ input[type="range"]::-moz-range-thumb {
       var fStats = countWaferSpectra(w.fibril);
       var cStats = countWaferSpectra(w.control);
       var isActive = w.id === activeWaferId;
+      var state = w.analysisState || 'idle';
+      var progressPct = Math.round((w.analysisProgress || 0) * 100);
+      var progressLabel = w.analysisLabel || ('분석 중 ' + progressPct + '%');
       html += '<div class="wafer-card' + (isActive ? ' active' : '') + '" data-wafer-id="' + w.id + '">' +
         '<label class="wafer-header">' +
           '<input type="radio" name="active-wafer" value="' + w.id + '"' + (isActive ? ' checked' : '') + '>' +
@@ -1463,10 +1520,34 @@ input[type="range"]::-moz-range-thumb {
           '<span>Fibril: ' + fStats.concs + '개 농도, ' + fStats.spectra + '개</span>' +
           '<span>Control: ' + cStats.concs + '개 농도, ' + cStats.spectra + '개</span>' +
         '</div>' +
+        '<div class="wafer-progress" data-wafer-id="' + w.id + '" style="display:' + (state === 'analyzing' ? '' : 'none') + ';">' +
+          '<div class="wafer-progress-bar"><div class="wafer-progress-fill" style="width:' + progressPct + '%;"></div></div>' +
+          '<span class="wafer-progress-text">' + escapeHtml(progressLabel) + '</span>' +
+        '</div>' +
+        '<span class="wafer-status-done" data-wafer-id="' + w.id + '" style="display:' + (state === 'done' ? 'inline-block' : 'none') + ';">분석됨</span>' +
         '<button class="btn-remove-wafer" data-wafer-id="' + w.id + '">삭제</button>' +
         '</div>';
     });
     listEl.innerHTML = html;
+  }
+
+  function updateWaferCardStatus(w) {
+    if (!w) return;
+    var listEl = document.getElementById('wafer-list');
+    if (!listEl) return;
+    var card = listEl.querySelector('.wafer-card[data-wafer-id="' + w.id + '"]');
+    if (!card) return;
+    var state = w.analysisState || 'idle';
+    var progressPct = Math.round((w.analysisProgress || 0) * 100);
+    var progressLabel = w.analysisLabel || ('분석 중 ' + progressPct + '%');
+    var progEl = card.querySelector('.wafer-progress');
+    var fillEl = card.querySelector('.wafer-progress-fill');
+    var textEl = card.querySelector('.wafer-progress-text');
+    var doneEl = card.querySelector('.wafer-status-done');
+    if (progEl) progEl.style.display = (state === 'analyzing') ? '' : 'none';
+    if (fillEl) fillEl.style.width = progressPct + '%';
+    if (textEl) textEl.textContent = progressLabel;
+    if (doneEl) doneEl.style.display = (state === 'done') ? 'inline-block' : 'none';
   }
 
   function escapeHtml(s) {
@@ -1490,6 +1571,7 @@ input[type="range"]::-moz-range-thumb {
       el.innerHTML = '현재 분석 대상: <strong>' + escapeHtml(w.name) + '</strong>';
     }
   }
+  // Banner CSS no longer needed since element removed
 
   // Sidebar event delegation
   (function setupSidebarDelegation(){
@@ -1547,9 +1629,11 @@ input[type="range"]::-moz-range-thumb {
     var grid = document.getElementById('ai-conc-grid');
     if (!checklist || !grid) return;
     var w = getActiveWafer();
+    var card = document.getElementById('ai-conc-checklist-card');
     if (!w) {
       grid.innerHTML = '';
       checklist.style.display = 'none';
+      if (card) card.style.display = 'none';
       return;
     }
     var html = '';
@@ -1572,19 +1656,22 @@ input[type="range"]::-moz-range-thumb {
     });
     grid.innerHTML = html;
     checklist.style.display = anyFound ? '' : 'none';
+    if (card) card.style.display = anyFound ? '' : 'none';
+  }
+
+  function waferHasAnyPair(w) {
+    if (!w) return false;
+    for (var i = 0; i < KNOWN_CONCS_DISPLAY.length; i++) {
+      var c = KNOWN_CONCS_DISPLAY[i];
+      if (w.fibril[c] && w.fibril[c].spectra.length > 0 &&
+          w.control[c] && w.control[c].spectra.length > 0) return true;
+    }
+    return false;
   }
 
   function updateAiAnalyzeButton() {
-    var w = getActiveWafer();
-    if (!w) { btnAiAnalyze.disabled = true; return; }
-    var anyPair = false;
-    KNOWN_CONCS_DISPLAY.forEach(function(conc) {
-      if (w.fibril[conc] && w.fibril[conc].spectra.length > 0 &&
-          w.control[conc] && w.control[conc].spectra.length > 0) {
-        anyPair = true;
-      }
-    });
-    btnAiAnalyze.disabled = !anyPair;
+    var anyValid = wafers.some(waferHasAnyPair);
+    btnAiAnalyze.disabled = !anyValid;
   }
 
 	  btnAiAnalyze.addEventListener('click', function() {
@@ -1793,6 +1880,11 @@ input[type="range"]::-moz-range-thumb {
       showError('활성 기판이 없습니다. 사이드바에서 기판을 선택하세요.');
       return;
     }
+    runAiAnalysisForWafer(activeW);
+	  }
+
+	  function runAiAnalysisForWafer(activeW) {
+    if (!activeW) return;
 
     var featureKeys = ['g_position', 'g_fwhm', 'd_g_ratio', 'i2d_ig_ratio'];
     var featureLabels = {
@@ -1851,7 +1943,6 @@ input[type="range"]::-moz-range-thumb {
     });
 
     if (concResults.length === 0) {
-      showError('Fibril과 Control 모두 존재하는 농도 쌍이 없습니다.');
       return;
     }
 
@@ -1906,7 +1997,7 @@ input[type="range"]::-moz-range-thumb {
       bestFeatureKey: bestFeatureKey,
       detectionLimit: detectionLimit
     };
-    renderAiFromCache(activeW.aiCache);
+    if (activeW.id === activeWaferId) renderAiFromCache(activeW.aiCache);
 	  }
 
 	  function renderAiFromCache(cache) {
@@ -1920,8 +2011,32 @@ input[type="range"]::-moz-range-thumb {
 	  }
 
 	  function runCombinedAnalysis() {
-	    runAiMultiAnalysis();
-	    startMlAnalysisAsync();
+	    hideError();
+	    var targets = wafers.filter(waferHasAnyPair);
+	    if (!targets.length) {
+	      showError('분석 가능한 기판이 없습니다 (Fibril과 Control 농도 쌍 필요).');
+	      return;
+	    }
+	    targets.forEach(function(w) {
+	      if (w.analysisState === 'analyzing') return;
+	      w.analysisState = 'analyzing';
+	      w.analysisProgress = 0;
+	      w.analysisLabel = '분석 준비 중...';
+	      updateWaferCardStatus(w);
+	      // AI part: fast, sync
+	      try { runAiAnalysisForWafer(w); } catch(e) {}
+	      // ML part: async with per-wafer progress
+	      startMlAnalysisAsyncForWafer(w, function(frac, done, total) {
+	        w.analysisProgress = frac;
+	        w.analysisLabel = '분석 중 ' + done + '/' + total;
+	        updateWaferCardStatus(w);
+	      }, function() {
+	        w.analysisState = 'done';
+	        w.analysisProgress = 1;
+	        w.analysisLabel = '분석됨';
+	        updateWaferCardStatus(w);
+	      });
+	    });
 	  }
 
   // ─── Render: Overview Badges ───
@@ -2302,29 +2417,39 @@ input[type="range"]::-moz-range-thumb {
 	  var RAW_VECTOR_SIZE = 96;
 
 	  function startMlAnalysisAsync() {
-	    var token = ++mlRunToken;
 	    var activeW = getActiveWafer();
-	    var resultEl = document.getElementById('ml-results');
-	    var statusEl = document.getElementById('ml-status');
-	    var detailEl = document.getElementById('ml-model-details');
-	    var chartEl = document.getElementById('ml-accuracy-chart');
-	    if (!resultEl || !statusEl || !detailEl || !chartEl) return;
-	    resultEl.style.display = 'block';
-	    detailEl.innerHTML = '';
-	    chartEl.innerHTML = '<div style="text-align:center;padding:80px 20px;color:#9E9E9E;font-size:13px;">AI 모델 평가 준비 중</div>';
-	    statusEl.textContent = 'AI 분석 준비 중... 단순 통계분석 탭은 바로 확인할 수 있습니다.';
+	    if (!activeW) return;
+	    startMlAnalysisAsyncForWafer(activeW);
+	  }
 
-	    if (!activeW) {
-	      statusEl.textContent = '활성 기판이 없습니다.';
-	      return;
+	  function startMlAnalysisAsyncForWafer(wafer, onProgress, onDone) {
+	    if (!wafer) { if (onDone) onDone(); return; }
+	    wafer.mlToken = (wafer.mlToken || 0) + 1;
+	    var token = wafer.mlToken;
+	    var isActive = function() { return wafer.id === activeWaferId; };
+
+	    if (isActive()) {
+	      var resultEl = document.getElementById('ml-results');
+	      var statusEl = document.getElementById('ml-status');
+	      var detailEl = document.getElementById('ml-model-details');
+	      var chartEl = document.getElementById('ml-accuracy-chart');
+	      if (resultEl) resultEl.style.display = 'block';
+	      if (detailEl) detailEl.innerHTML = '';
+	      if (chartEl) chartEl.innerHTML = '<div style="text-align:center;padding:80px 20px;color:#9E9E9E;font-size:13px;">AI 모델 평가 준비 중</div>';
+	      if (statusEl) statusEl.textContent = 'AI 분석 준비 중...';
 	    }
 
 	    setTimeout(function() {
-	      if (token !== mlRunToken) return;
-	      var datasets = buildMlDatasets(activeW);
+	      if (token !== wafer.mlToken) return;
+	      var datasets = buildMlDatasets(wafer);
 	      if (!datasets.length) {
-	        statusEl.textContent = 'Fibril과 Control이 모두 있는 농도 데이터가 없습니다.';
-	        chartEl.innerHTML = '<div style="text-align:center;padding:80px 20px;color:#9E9E9E;font-size:13px;">분석 가능한 농도쌍 없음</div>';
+	        if (isActive()) {
+	          var statusEl = document.getElementById('ml-status');
+	          var chartEl = document.getElementById('ml-accuracy-chart');
+	          if (statusEl) statusEl.textContent = 'Fibril과 Control이 모두 있는 농도 데이터가 없습니다.';
+	          if (chartEl) chartEl.innerHTML = '<div style="text-align:center;padding:80px 20px;color:#9E9E9E;font-size:13px;">분석 가능한 농도쌍 없음</div>';
+	        }
+	        if (onDone) onDone();
 	        return;
 	      }
 
@@ -2339,27 +2464,36 @@ input[type="range"]::-moz-range-thumb {
 	      var results = [];
 	      var done = 0;
 	      function step() {
-	        if (token !== mlRunToken) return;
+	        if (token !== wafer.mlToken) return;
 	        if (done >= tasks.length) {
-	          activeW.mlCache = {
+	          wafer.mlCache = {
 	            results: results,
 	            datasets: datasets,
 	            models: models,
 	            totalConcs: datasets.length,
 	            totalModels: models.length
 	          };
-	          statusEl.textContent = 'AI 분석 완료: ' + datasets.length + '개 농도, ' + models.length + '개 모델 평가';
-	          renderMlAccuracyChart(results);
-	          renderMlModelDetails(results, datasets, models);
+	          if (isActive()) {
+	            var statusEl = document.getElementById('ml-status');
+	            if (statusEl) statusEl.textContent = 'AI 분석 완료: ' + datasets.length + '개 농도, ' + models.length + '개 모델 평가';
+	            renderMlAccuracyChart(results);
+	            renderMlModelDetails(results, datasets, models);
+	          }
+	          if (onProgress) onProgress(1, tasks.length, tasks.length);
+	          if (onDone) onDone();
 	          return;
 	        }
 	        var task = tasks[done];
 	        var res = evaluateMlModel(task.model, task.dataset);
 	        results.push(res);
 	        done++;
-	        statusEl.textContent = 'AI 분석 중... ' + done + '/' + tasks.length + ' (' + task.dataset.conc + ', ' + task.model.name + ')';
-	        renderMlAccuracyChart(results);
-	        renderMlModelDetails(results, datasets, models);
+	        if (isActive()) {
+	          var statusEl = document.getElementById('ml-status');
+	          if (statusEl) statusEl.textContent = 'AI 분석 중... ' + done + '/' + tasks.length + ' (' + task.dataset.conc + ', ' + task.model.name + ')';
+	          renderMlAccuracyChart(results);
+	          renderMlModelDetails(results, datasets, models);
+	        }
+	        if (onProgress) onProgress(done / tasks.length, done, tasks.length);
 	        setTimeout(step, 0);
 	      }
 	      step();
@@ -3387,7 +3521,7 @@ input[type="range"]::-moz-range-thumb {
 
 })();
 </script>
-<div id="app-version" title="이 페이지의 빌드 시각. 다른 PC와 다르면 새로고침(Ctrl/Cmd+Shift+R) 하세요.">v2026.05.18.3</div>
+<div id="app-version" title="이 페이지의 빌드 시각. 다른 PC와 다르면 새로고침(Ctrl/Cmd+Shift+R) 하세요.">v2026.05.18.4</div>
 <style>
 #app-version {
   position: fixed;
