@@ -47,6 +47,12 @@ body {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transition: border-color 0.15s, background 0.15s;
+}
+.sidebar.drop-active {
+  border-color: #D97A3C;
+  border-style: dashed;
+  background: #FFF6EE;
 }
 .sidebar h2 {
   font-size: 15px;
@@ -1129,6 +1135,92 @@ input[type="range"]::-moz-range-thumb {
     }
   });
 
+  // ─── Folder Drag & Drop ───
+  function readAllEntries(reader) {
+    return new Promise(function(resolve, reject){
+      var collected = [];
+      function pump(){
+        reader.readEntries(function(entries){
+          if (!entries.length) resolve(collected);
+          else { collected = collected.concat(entries); pump(); }
+        }, reject);
+      }
+      pump();
+    });
+  }
+  function traverseEntry(entry, prefix) {
+    if (entry.isFile) {
+      return new Promise(function(resolve){
+        entry.file(function(file){
+          try {
+            Object.defineProperty(file, 'webkitRelativePath', { value: prefix + entry.name, configurable: true });
+          } catch(e) {}
+          resolve([file]);
+        }, function(){ resolve([]); });
+      });
+    }
+    if (entry.isDirectory) {
+      var dirReader = entry.createReader();
+      return readAllEntries(dirReader).then(function(entries){
+        var chain = Promise.resolve([]);
+        entries.forEach(function(sub){
+          chain = chain.then(function(acc){
+            return traverseEntry(sub, prefix + entry.name + '/').then(function(files){
+              return acc.concat(files);
+            });
+          });
+        });
+        return chain;
+      });
+    }
+    return Promise.resolve([]);
+  }
+  var dropZone = document.querySelector('.sidebar');
+  if (dropZone) {
+    ['dragenter','dragover'].forEach(function(evt){
+      dropZone.addEventListener(evt, function(e){
+        if (!e.dataTransfer || !e.dataTransfer.types) return;
+        if (Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') === -1) return;
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('drop-active');
+      });
+    });
+    ['dragleave','dragend'].forEach(function(evt){
+      dropZone.addEventListener(evt, function(e){
+        if (e.target === dropZone) dropZone.classList.remove('drop-active');
+      });
+    });
+    dropZone.addEventListener('drop', function(e){
+      if (!e.dataTransfer) return;
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('drop-active');
+      var items = e.dataTransfer.items;
+      if (!items || !items.length) {
+        if (e.dataTransfer.files && e.dataTransfer.files.length) {
+          createWaferFromFiles(e.dataTransfer.files);
+        }
+        return;
+      }
+      var chain = Promise.resolve([]);
+      for (var i = 0; i < items.length; i++) {
+        (function(item){
+          var entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+          if (!entry) return;
+          chain = chain.then(function(acc){
+            return traverseEntry(entry, '').then(function(files){
+              return acc.concat(files);
+            });
+          });
+        })(items[i]);
+      }
+      chain.then(function(files){
+        if (files.length) createWaferFromFiles(files);
+      });
+    });
+  }
+
   function detectConcentration(relativePath) {
     // Path pattern: rootFolder/concentration/OMx500/AUTO_xxx.csv
     var parts = relativePath.split('/');
@@ -1266,11 +1358,18 @@ input[type="range"]::-moz-range-thumb {
 	  function setActiveWafer(id) {
 	    if (activeWaferId === id) return;
 	    activeWaferId = id;
-	    // Clear analysis results (stale)
+	    ++mlRunToken; // cancel any in-progress ML analysis from previous wafer
+	    var newW = wafers.find(function(x){ return x.id === id; });
 	    var aiRes = document.getElementById('ai-results');
-	    if (aiRes) aiRes.classList.remove('visible');
+	    if (aiRes) {
+	      if (newW && newW.aiCache) renderAiFromCache(newW.aiCache);
+	      else aiRes.classList.remove('visible');
+	    }
 	    var mlRes = document.getElementById('ml-results');
-	    if (mlRes) mlRes.style.display = 'none';
+	    if (mlRes) {
+	      if (newW && newW.mlCache) renderMlFromCache(newW.mlCache);
+	      else mlRes.style.display = 'none';
+	    }
 	    // Reset drill conc if not present in new wafer
 	    var w = getActiveWafer();
     if (currentDrillConc && w) {
@@ -1293,10 +1392,18 @@ input[type="range"]::-moz-range-thumb {
     if (activeWaferId === id) {
       activeWaferId = wafers[0] ? wafers[0].id : null;
 	      currentDrillConc = null;
+	      ++mlRunToken;
+	      var newW = activeWaferId ? wafers.find(function(x){ return x.id === activeWaferId; }) : null;
 	      var aiRes = document.getElementById('ai-results');
-	      if (aiRes) aiRes.classList.remove('visible');
+	      if (aiRes) {
+	        if (newW && newW.aiCache) renderAiFromCache(newW.aiCache);
+	        else aiRes.classList.remove('visible');
+	      }
 	      var mlRes = document.getElementById('ml-results');
-	      if (mlRes) mlRes.style.display = 'none';
+	      if (mlRes) {
+	        if (newW && newW.mlCache) renderMlFromCache(newW.mlCache);
+	        else mlRes.style.display = 'none';
+	      }
 	    }
 	    onWafersChanged();
 	  }
@@ -1779,14 +1886,24 @@ input[type="range"]::-moz-range-thumb {
       }
     }
 
-    // Render all sections
-    renderOverviewBadges(concResults);
-    renderSummaryLines(concResults, detectionLimit, crossConc, featureLabels, bestFeatureKey);
-    renderDoseResponseChart(concResults, crossConc, featureKeys, featureLabels, bestFeatureKey);
-    renderHeatmapChart(concResults, featureKeys, featureLabels);
-    renderDetailTabs(concResults, featureLabels);
-    renderOpenSummary(concResults, crossConc, featureLabels, bestFeatureKey, detectionLimit);
+    activeW.aiCache = {
+      concResults: concResults,
+      crossConc: crossConc,
+      featureKeys: featureKeys,
+      featureLabels: featureLabels,
+      bestFeatureKey: bestFeatureKey,
+      detectionLimit: detectionLimit
+    };
+    renderAiFromCache(activeW.aiCache);
+	  }
 
+	  function renderAiFromCache(cache) {
+	    renderOverviewBadges(cache.concResults);
+	    renderSummaryLines(cache.concResults, cache.detectionLimit, cache.crossConc, cache.featureLabels, cache.bestFeatureKey);
+	    renderDoseResponseChart(cache.concResults, cache.crossConc, cache.featureKeys, cache.featureLabels, cache.bestFeatureKey);
+	    renderHeatmapChart(cache.concResults, cache.featureKeys, cache.featureLabels);
+	    renderDetailTabs(cache.concResults, cache.featureLabels);
+	    renderOpenSummary(cache.concResults, cache.crossConc, cache.featureLabels, cache.bestFeatureKey, cache.detectionLimit);
 	    document.getElementById('ai-results').classList.add('visible');
 	  }
 
@@ -2212,6 +2329,13 @@ input[type="range"]::-moz-range-thumb {
 	      function step() {
 	        if (token !== mlRunToken) return;
 	        if (done >= tasks.length) {
+	          activeW.mlCache = {
+	            results: results,
+	            datasets: datasets,
+	            models: models,
+	            totalConcs: datasets.length,
+	            totalModels: models.length
+	          };
 	          statusEl.textContent = 'AI 분석 완료: ' + datasets.length + '개 농도, ' + models.length + '개 모델 평가';
 	          renderMlAccuracyChart(results);
 	          renderMlModelDetails(results, datasets, models);
@@ -2228,6 +2352,15 @@ input[type="range"]::-moz-range-thumb {
 	      }
 	      step();
 	    }, 0);
+	  }
+
+	  function renderMlFromCache(cache) {
+	    var resultEl = document.getElementById('ml-results');
+	    var statusEl = document.getElementById('ml-status');
+	    if (resultEl) resultEl.style.display = 'block';
+	    if (statusEl) statusEl.textContent = 'AI 분석 완료: ' + cache.totalConcs + '개 농도, ' + cache.totalModels + '개 모델 평가 (이전 결과)';
+	    renderMlAccuracyChart(cache.results);
+	    renderMlModelDetails(cache.results, cache.datasets, cache.models);
 	  }
 
 	  function rangeStats(wavelengths, spectrum, minWl, maxWl) {
@@ -3242,5 +3375,24 @@ input[type="range"]::-moz-range-thumb {
 
 })();
 </script>
+<div id="app-version" title="이 페이지의 빌드 시각. 다른 PC와 다르면 새로고침(Ctrl/Cmd+Shift+R) 하세요.">v2026.05.18.2</div>
+<style>
+#app-version {
+  position: fixed;
+  right: 8px;
+  bottom: 6px;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 10px;
+  color: #9E9E9E;
+  background: rgba(255,255,255,0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: auto;
+  user-select: text;
+  z-index: 9999;
+  opacity: 0.55;
+}
+#app-version:hover { opacity: 1; }
+</style>
 </body>
 </html>
