@@ -1203,20 +1203,32 @@ input[type="range"]::-moz-range-thumb {
         }
         return;
       }
-      var chain = Promise.resolve([]);
+      // Each top-level directory → its own wafer.
+      // Top-level loose files are bundled into a single wafer.
+      var entries = [];
       for (var i = 0; i < items.length; i++) {
-        (function(item){
-          var entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
-          if (!entry) return;
-          chain = chain.then(function(acc){
+        var entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
+        if (entry) entries.push(entry);
+      }
+      var chain = Promise.resolve();
+      var looseFiles = [];
+      entries.forEach(function(entry){
+        if (entry.isDirectory) {
+          chain = chain.then(function(){
             return traverseEntry(entry, '').then(function(files){
-              return acc.concat(files);
+              if (files.length) createWaferFromFiles(files);
             });
           });
-        })(items[i]);
-      }
-      chain.then(function(files){
-        if (files.length) createWaferFromFiles(files);
+        } else if (entry.isFile) {
+          chain = chain.then(function(){
+            return traverseEntry(entry, '').then(function(files){
+              looseFiles = looseFiles.concat(files);
+            });
+          });
+        }
+      });
+      chain.then(function(){
+        if (looseFiles.length) createWaferFromFiles(looseFiles);
       });
     });
   }
@@ -3375,7 +3387,7 @@ input[type="range"]::-moz-range-thumb {
 
 })();
 </script>
-<div id="app-version" title="이 페이지의 빌드 시각. 다른 PC와 다르면 새로고침(Ctrl/Cmd+Shift+R) 하세요.">v2026.05.18.2</div>
+<div id="app-version" title="이 페이지의 빌드 시각. 다른 PC와 다르면 새로고침(Ctrl/Cmd+Shift+R) 하세요.">v2026.05.18.3</div>
 <style>
 #app-version {
   position: fixed;
